@@ -1,9 +1,15 @@
 import "~/styles/globals.css";
+import "@mantine/core/styles.css";
 
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { MantineProvider } from "@mantine/core";
+import {
+  mantineCssVariablesResolver,
+  mantineThemeOverride,
+} from "~/mantine-theme";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
-        <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
+        <MantineProvider
+          theme={mantineThemeOverride}
+          cssVariablesResolver={mantineCssVariablesResolver}
+        >
+          <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
+        </MantineProvider>
       </body>
     </html>
   );
