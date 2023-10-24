@@ -15,6 +15,7 @@ const LatestPost: NextPage = async () => {
           <div>{latestPost?.content}</div>
         </div>
       )}
+
       {!latestPost && <div>No posts yet</div>}
     </div>
   );
