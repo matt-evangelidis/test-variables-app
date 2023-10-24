@@ -3,6 +3,7 @@ import { type WithClassName } from "$react-types";
 import { Text, Title } from "@mantine/core";
 import type { Post } from "@prisma/client";
 import { type FC } from "react";
+import { TimeStamp } from "~/components/time-stamp";
 
 export const PostCard: FC<WithClassName & { post: Post }> = ({
   className,
@@ -15,7 +16,10 @@ export const PostCard: FC<WithClassName & { post: Post }> = ({
         className,
       )}
     >
-      <Title order={4}>{post.title}</Title>
+      <div className="flex w-full justify-between">
+        <Title order={4}>{post.title}</Title>
+        <TimeStamp size="sm" considerDistanceFromNow date={post.createdAt} />
+      </div>
       <Text>{post.content}</Text>
     </div>
   );
