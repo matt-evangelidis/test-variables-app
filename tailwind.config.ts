@@ -4,6 +4,7 @@ import {
   TAILWIND_COLOR_SHADES,
   composeSingleTailwindRgbColor,
   MANTINE_SPECIAL_COLORS,
+  MANTINE_SIZES,
 } from "./src/lib/theme-helpers";
 
 const generateTailwindColorSetForMantineColor = (colorName: string) => {
@@ -28,8 +29,6 @@ MANTINE_COLOR_NAMES.forEach((color) => {
 MANTINE_SPECIAL_COLORS.forEach((colorName) => {
   mantineColorTwEntries[colorName] = composeSingleTailwindRgbColor(colorName);
 });
-
-const MANTINE_SIZES = ["xs", "sm", "md", "lg", "xl"];
 
 type ComposeMantineSizeTwEntriesInput = {
   extraSizes: string[];
@@ -81,7 +80,7 @@ export default {
     borderRadius: composeMantineSizeTwEntries("radius", {
       extraSizes: ["default"],
     }),
-    colors: mantineColorTwEntries,
+    colors: { ...mantineColorTwEntries, transparent: "transparent" },
     fontSize: composeMantineSizeTwEntries("font-size"),
     lineHeight: composeMantineSizeTwEntries("line-height"),
     fontFamily: {

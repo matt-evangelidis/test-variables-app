@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    @apply m-0;
+  }
+}
+
+@layer utilities {
+  /* 
+	 * Apply the default solid border style if tailwind's `border`
+	 * utility is used without a border style.
+	 */
+  .border:not(
+      :where(
+          .border-dashed,
+          .border-dotted,
+          .border-double,
+          .border-none,
+          .border-hidden
+        )
+    ) {
+    @apply border-solid;
+  }
+}

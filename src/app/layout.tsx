@@ -44,7 +44,9 @@ export default function RootLayout({
           cssVariablesResolver={mantineCssVariablesResolver}
           defaultColorScheme={DEFAULT_COLOR_SCHEME}
         >
-          <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
+          <TRPCReactProvider headers={headers()}>
+            <main className="min-h-screen w-full">{children}</main>
+          </TRPCReactProvider>
         </MantineProvider>
       </body>
     </html>

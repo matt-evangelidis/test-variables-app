@@ -3,9 +3,18 @@ import {
   type MantineColor,
   getPrimaryShade,
   type MantineColorShade,
+  type MantineSize,
 } from "@mantine/core";
 import { keys, arrayOfAll } from "./utils"; // Must be relative path to be imported by tailwind config
 import type { StrictExclude, StrictExtract } from "$utility-types";
+
+export const MANTINE_SIZES = arrayOfAll<MantineSize>()([
+  "xs",
+  "sm",
+  "md",
+  "lg",
+  "xl",
+]);
 
 export const MANTINE_COLOR_NAMES = arrayOfAll<MantineColor>()([
   "blue",
