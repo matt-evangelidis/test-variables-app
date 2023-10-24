@@ -1,43 +1,42 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm, zodResolver } from "@mantine/form";
 
 import { api } from "~/trpc/react";
+import { createPostInputSchema } from "~/schemas";
+import type { z } from "zod";
+import { Button, TextInput } from "@mantine/core";
+
+const useCreatePostForm = () =>
+  useForm<z.infer<typeof createPostInputSchema>>({
+    validate: zodResolver(createPostInputSchema),
+    initialValues: {
+      title: "",
+    },
+  });
 
 export function CreatePost() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
+  const form = useCreatePostForm();
 
   const createPost = api.post.create.useMutation({
     onSuccess: () => {
       router.refresh();
-      setTitle("");
+      form.reset();
     },
   });
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        createPost.mutate({ title });
-      }}
+      onSubmit={form.onSubmit((data) => createPost.mutate(data))}
+      onReset={form.onReset}
       className="flex flex-col gap-2"
     >
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="rounded-full w-full px-4 py-2 text-black"
-      />
-      <button
-        type="submit"
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
-        disabled={createPost.isLoading}
-      >
-        {createPost.isLoading ? "Submitting..." : "Submit"}
-      </button>
+      <TextInput label="Title" {...form.getInputProps("title")} />
+      <Button type="submit" loading={createPost.isLoading}>
+        Submit
+      </Button>
     </form>
   );
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createPostInputSchema } from "~/schemas";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -12,11 +13,8 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: publicProcedure
-    .input(z.object({ title: z.string().min(1) }))
+    .input(createPostInputSchema)
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       return ctx.db.post.create({
         data: {
           title: input.title,

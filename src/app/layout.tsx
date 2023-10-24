@@ -5,7 +5,11 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { MantineProvider } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  type MantineColorScheme,
+  MantineProvider,
+} from "@mantine/core";
 import {
   mantineCssVariablesResolver,
   mantineThemeOverride,
@@ -22,6 +26,8 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
+const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
+
 export default function RootLayout({
   children,
 }: {
@@ -29,10 +35,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <ColorSchemeScript defaultColorScheme={DEFAULT_COLOR_SCHEME} />
+      </head>
       <body className={`font-sans ${inter.variable}`}>
         <MantineProvider
           theme={mantineThemeOverride}
           cssVariablesResolver={mantineCssVariablesResolver}
+          defaultColorScheme={DEFAULT_COLOR_SCHEME}
         >
           <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
         </MantineProvider>
