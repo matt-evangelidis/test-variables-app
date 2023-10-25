@@ -89,7 +89,7 @@ export default {
       heading: "var(--mantine-font-family-headings)",
     },
     extend: {
-      spacing: mantineSpacingEntries,
+      spacing: { ...mantineSpacingEntries, navbarHeight: "64px" },
       maxWidth: mantineSpacingEntries,
     },
   },

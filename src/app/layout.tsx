@@ -14,6 +14,7 @@ import {
   mantineCssVariablesResolver,
   mantineThemeOverride,
 } from "~/mantine-theme";
+import { Navbar } from "~/app/_components/navbar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,7 +46,10 @@ export default function RootLayout({
           defaultColorScheme={DEFAULT_COLOR_SCHEME}
         >
           <TRPCReactProvider headers={headers()}>
-            <main className="min-h-screen w-full">{children}</main>
+            <Navbar className="fixed top-0" />
+            <main className="pt-navbarHeight min-h-screen w-full">
+              {children}
+            </main>
           </TRPCReactProvider>
         </MantineProvider>
       </body>

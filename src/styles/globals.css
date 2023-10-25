@@ -14,6 +14,16 @@
   }
 }
 
+@layer components {
+  .link-overlay-container {
+    @apply relative;
+  }
+
+  .link-overlay-anchor {
+    @apply after:absolute after:left-0 after:top-0 after:h-full after:w-full after:content-[''];
+  }
+}
+
 @layer utilities {
   /* 
 	 * Apply the default solid border style if tailwind's `border`

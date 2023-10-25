@@ -46,4 +46,10 @@ export const postRouter = createTRPCRouter({
     const count = await ctx.db.post.count();
     return Math.ceil(count / POST_PAGE_SIZE);
   }),
+
+  getById: publicProcedure.input(z.string()).query(({ input: postId, ctx }) => {
+    return ctx.db.post.findUniqueOrThrow({
+      where: { id: postId },
+    });
+  }),
 });

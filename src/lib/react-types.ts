@@ -1,9 +1,12 @@
 import type { NextPage } from "next";
+import type { PropsWithChildren } from "react";
 import type { EmptyObject } from "type-fest";
 
 export type WithClassName = {
   className?: string;
 };
+
+export type WithChildren = PropsWithChildren;
 
 export type NextServerComponentProps = {
   params?: Record<string, string>;

@@ -37,24 +37,22 @@ const PostListPage: NextServerPage = async ({
 
   const thisIsTheOnlyPage = searchparams.page === 1 && !postList.hasMore;
   return (
-    <div className="flex w-full justify-center pt-4">
-      <div className="flex w-full max-w-md flex-col px-4">
-        <h2 className="mb-8">Latest Posts</h2>
-        <div className="mb-8 flex w-full flex-col gap-2">
-          {postList.posts.map((post) => (
-            <PostCard post={post} key={post.id} />
-          ))}
-        </div>
-        {!thisIsTheOnlyPage && (
-          <Suspense>
-            <PostListPagination
-              className="mx-auto"
-              currentPage={searchparams.page}
-            />
-          </Suspense>
-        )}
+    <>
+      <h2 className="mb-8">Latest Posts</h2>
+      <div className="mb-8 flex w-full flex-col gap-2">
+        {postList.posts.map((post) => (
+          <PostCard post={post} key={post.id} />
+        ))}
       </div>
-    </div>
+      {!thisIsTheOnlyPage && (
+        <Suspense>
+          <PostListPagination
+            className="mx-auto"
+            currentPage={searchparams.page}
+          />
+        </Suspense>
+      )}
+    </>
   );
 };
 
