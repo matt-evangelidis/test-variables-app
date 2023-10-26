@@ -21,7 +21,7 @@ export const postRouter = createTRPCRouter({
         where: {
           id: input.postId,
         },
-        data: input,
+        data: input.data,
       });
     }),
 

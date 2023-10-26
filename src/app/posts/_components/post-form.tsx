@@ -11,12 +11,12 @@ import type { Post } from "@prisma/client";
 
 const formResolver = zodResolver(createPostInputSchema);
 
-const useNewPostForm = () =>
+const useNewPostForm = (existingPost: Post | null) =>
   useForm<z.infer<typeof createPostInputSchema>>({
     validate: formResolver,
     initialValues: {
-      title: "",
-      content: "",
+      title: existingPost?.title ?? "",
+      content: existingPost?.content ?? "",
     },
   });
 
@@ -27,7 +27,7 @@ type PostFormStatus =
   | {
       mode: "edit";
       data: {
-        postId: string;
+        post: Post;
       };
     };
 
@@ -37,7 +37,7 @@ type PostFormProps = {
 
 export const PostForm: FC<PostFormProps> = ({ status }) => {
   const router = useRouter();
-  const form = useNewPostForm();
+  const form = useNewPostForm(status.mode === "edit" ? status.data.post : null);
 
   const gotoNewPost = (post: Post) => {
     router.replace(`/posts/${post.id}`);
@@ -56,7 +56,7 @@ export const PostForm: FC<PostFormProps> = ({ status }) => {
       createPost.mutate(data);
     } else {
       editPost.mutate({
-        postId: status.data.postId,
+        postId: status.data.post.id,
         data,
       });
     }
@@ -72,8 +72,11 @@ export const PostForm: FC<PostFormProps> = ({ status }) => {
           {...form.getInputProps("content")}
           label="Content"
         />
-        <Button type="submit" loading={createPost.isLoading}>
-          Create Post
+        <Button
+          type="submit"
+          loading={createPost.isLoading || editPost.isLoading}
+        >
+          {status.mode === "create" ? "Create" : "Save"}
         </Button>
       </form>
     </>
