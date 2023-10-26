@@ -1,7 +1,5 @@
-import { Divider } from "@mantine/core";
 import { type NextPage } from "next";
 import { Suspense } from "react";
-import { CreatePost } from "~/app/_components/create-post";
 import { api } from "~/trpc/server";
 
 const LatestPost: NextPage = async () => {
@@ -28,10 +26,6 @@ const Home: NextPage = () => {
         <Suspense fallback={<div>Loading...</div>}>
           <LatestPost />
         </Suspense>
-
-        <Divider className="mb-8 mt-12 w-full" />
-
-        <CreatePost className="w-full" />
       </div>
     </div>
   );

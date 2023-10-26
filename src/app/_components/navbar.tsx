@@ -18,6 +18,10 @@ const navbarItems: NavbarItem[] = [
     label: "Posts",
     href: "/posts",
   },
+  {
+    label: "New Post",
+    href: "/posts/new",
+  },
 ];
 
 export const Navbar: FC<WithClassName> = ({ className }) => (

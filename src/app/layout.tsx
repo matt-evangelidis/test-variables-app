@@ -47,8 +47,12 @@ export default function RootLayout({
         >
           <TRPCReactProvider headers={headers()}>
             <Navbar className="fixed top-0" />
-            <main className="pt-navbarHeight min-h-screen w-full">
-              {children}
+            <main className="min-h-screen w-full pt-navbarHeight">
+              <div className="flex h-navbarHeight w-full justify-center pt-4">
+                <div className="flex w-full max-w-md flex-col px-4">
+                  {children}
+                </div>
+              </div>
             </main>
           </TRPCReactProvider>
         </MantineProvider>
