@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DB",
+      "detail": "Starts the development database",
+      "icon": {
+        "color": "terminal.ansiYellow",
+        "id": "database"
+      },
+      "type": "shell",
+      "isBackground": true,
+      "command": "pnpm db:dev",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new",
+      }
+    },
+    {
+      "label": "Server",
+      "detail": "Starts the NextJS development server",
+      "icon": {
+        "color": "terminal.ansiBlue",
+        "id": "server"
+      },
+      "type": "shell",
+      "isBackground": true,
+      "command": "pnpm dev",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Dev",
+      "dependsOn": ["DB", "Server"],
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

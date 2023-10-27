@@ -3,6 +3,7 @@ import { Button } from "@mantine/core";
 import { Text, Title } from "@mantine/core";
 import Link from "next/link";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
+import { BustCache } from "~/components/bust-cache";
 import { api } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
@@ -10,6 +11,9 @@ const PostPage: NextServerPage = async ({ params }) => {
   const post = await api.post.getById.query(postId);
   return (
     <>
+      <BustCache />
+      {/* BustCache is required because Server Components cache options
+          seem to be bugged right now and I can't disable the cache */}
       <div className="flex justify-between">
         <Title order={1} className="mb-4">
           {post.title}
@@ -31,5 +35,7 @@ const PostPage: NextServerPage = async ({ params }) => {
 };
 
 export default PostPage;
+
+export const revalidate = 0;
 
 export const dynamic = "force-dynamic";

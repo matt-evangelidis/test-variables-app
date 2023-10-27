@@ -6,12 +6,12 @@ import { type z } from "zod";
 import { createPostInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import { type FC } from "react";
-import { useRouter } from "next/navigation";
 import type { Post } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 const formResolver = zodResolver(createPostInputSchema);
 
-const useNewPostForm = (existingPost: Post | null) =>
+const useCreateOrEditPostForm = (existingPost: Post | null) =>
   useForm<z.infer<typeof createPostInputSchema>>({
     validate: formResolver,
     initialValues: {
@@ -37,7 +37,9 @@ type PostFormProps = {
 
 export const PostForm: FC<PostFormProps> = ({ status }) => {
   const router = useRouter();
-  const form = useNewPostForm(status.mode === "edit" ? status.data.post : null);
+  const form = useCreateOrEditPostForm(
+    status.mode === "edit" ? status.data.post : null,
+  );
 
   const gotoNewPost = (post: Post) => {
     router.replace(`/posts/${post.id}`);
