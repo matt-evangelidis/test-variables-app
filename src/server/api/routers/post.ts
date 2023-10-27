@@ -60,4 +60,10 @@ export const postRouter = createTRPCRouter({
       where: { id: postId },
     });
   }),
+
+  deleteById: publicProcedure.input(z.string()).mutation(({ input, ctx }) => {
+    return ctx.db.post.delete({
+      where: { id: input },
+    });
+  }),
 });
