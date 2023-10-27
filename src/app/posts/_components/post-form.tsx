@@ -7,7 +7,7 @@ import { createPostInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import { type FC } from "react";
 import type { Post } from "@prisma/client";
-import { useRouter } from "next/navigation";
+import { useCacheBustedNavigation } from "$next-helpers";
 
 const formResolver = zodResolver(createPostInputSchema);
 
@@ -36,13 +36,13 @@ type PostFormProps = {
 };
 
 export const PostForm: FC<PostFormProps> = ({ status }) => {
-  const router = useRouter();
+  const nav = useCacheBustedNavigation();
   const form = useCreateOrEditPostForm(
     status.mode === "edit" ? status.data.post : null,
   );
 
   const gotoNewPost = (post: Post) => {
-    router.replace(`/posts/${post.id}`);
+    nav.replace(`/posts/${post.id}`);
   };
 
   const editPost = api.post.edit.useMutation({
@@ -76,7 +76,7 @@ export const PostForm: FC<PostFormProps> = ({ status }) => {
         />
         <Button
           type="submit"
-          loading={createPost.isLoading || editPost.isLoading}
+          loading={createPost.isLoading || editPost.isLoading || nav.isLoading}
         >
           {status.mode === "create" ? "Create" : "Save"}
         </Button>
