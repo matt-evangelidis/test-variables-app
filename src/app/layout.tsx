@@ -17,7 +17,7 @@ import {
 import { Navbar } from "~/app/_components/navbar";
 import { type NextServerPage, type WithChildren } from "$react-types";
 import { AuthProvider } from "~/app/_components/auth-provider";
-import { getServerSession } from "~/server/auth";
+import { getServerAuthSession } from "~/server/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,7 +33,7 @@ export const metadata = {
 const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
 
 const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
-  const session = await getServerSession();
+  const session = await getServerAuthSession();
 
   return (
     <html lang="en">
