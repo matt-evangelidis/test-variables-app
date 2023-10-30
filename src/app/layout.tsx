@@ -15,9 +15,9 @@ import {
   mantineThemeOverride,
 } from "~/mantine-theme";
 import { Navbar } from "~/app/_components/navbar";
-import { getSession } from "next-auth/react";
 import { type NextServerPage, type WithChildren } from "$react-types";
 import { AuthProvider } from "~/app/_components/auth-provider";
+import { getServerSession } from "~/server/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,7 +33,7 @@ export const metadata = {
 const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
 
 const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
-  const session = await getSession();
+  const session = await getServerSession();
 
   return (
     <html lang="en">

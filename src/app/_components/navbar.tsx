@@ -1,8 +1,7 @@
 import { cx } from "$cx";
-import type { WithClassName } from "$react-types";
+import type { NextServerPage, WithClassName } from "$react-types";
 import { Anchor } from "@mantine/core";
 import Link from "next/link";
-import type { FC } from "react";
 import { SignInButton } from "~/app/_components/sign-in-button";
 
 type NavbarItem = {
@@ -25,7 +24,8 @@ const navbarItems: NavbarItem[] = [
   },
 ];
 
-export const Navbar: FC<WithClassName> = ({ className }) => (
+export const Navbar: NextServerPage<WithClassName> = ({ className }) => {
+return (
   <nav
     className={cx(
       "flex h-16 w-screen items-center justify-between bg-gray-200 px-2 dark:bg-gray-800",
@@ -44,4 +44,5 @@ export const Navbar: FC<WithClassName> = ({ className }) => (
       <SignInButton />
     </div>
   </nav>
-);
+)
+};

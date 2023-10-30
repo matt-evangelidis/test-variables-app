@@ -7,9 +7,11 @@
  * need to use are documented accordingly near the end.
  */
 import { initTRPC } from "@trpc/server";
-import { type NextRequest } from "next/server";
+import { type Session } from "next-auth";
+import { type NextResponse, type NextRequest } from "next/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { getServerSession } from "~/server/auth";
 
 import { db } from "~/server/db";
 
@@ -23,6 +25,7 @@ import { db } from "~/server/db";
 
 interface CreateContextOptions {
   headers: Headers;
+  session: Session | null;
 }
 
 /**
@@ -48,11 +51,14 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = (opts: { req: NextRequest }) => {
+export const createTRPCContext = async (opts: { req: NextRequest; res: NextResponse }) => {
   // Fetch stuff that depends on the request
+
+  const session = await getServerSession();
 
   return createInnerTRPCContext({
     headers: opts.req.headers,
+    session
   });
 };
 
