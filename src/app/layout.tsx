@@ -15,6 +15,9 @@ import {
   mantineThemeOverride,
 } from "~/mantine-theme";
 import { Navbar } from "~/app/_components/navbar";
+import { getSession } from "next-auth/react";
+import { type NextServerPage, type WithChildren } from "$react-types";
+import { AuthProvider } from "~/app/_components/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,34 +32,36 @@ export const metadata = {
 
 const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
+  const session = await getSession();
+
   return (
     <html lang="en">
       <head>
         <ColorSchemeScript defaultColorScheme={DEFAULT_COLOR_SCHEME} />
       </head>
       <body className={`font-sans ${inter.variable}`}>
-        <MantineProvider
-          theme={mantineThemeOverride}
-          cssVariablesResolver={mantineCssVariablesResolver}
-          defaultColorScheme={DEFAULT_COLOR_SCHEME}
-        >
-          <TRPCReactProvider headers={headers()}>
-            <Navbar className="fixed top-0" />
-            <main className="min-h-screen w-full pt-navbarHeight">
-              <div className="flex h-navbarHeight w-full justify-center pt-4">
-                <div className="flex w-full max-w-md flex-col px-4">
-                  {children}
+        <AuthProvider session={session}>
+          <MantineProvider
+            theme={mantineThemeOverride}
+            cssVariablesResolver={mantineCssVariablesResolver}
+            defaultColorScheme={DEFAULT_COLOR_SCHEME}
+          >
+            <TRPCReactProvider headers={headers()}>
+              <Navbar className="fixed top-0" />
+              <main className="min-h-screen w-full pt-navbarHeight">
+                <div className="flex h-navbarHeight w-full justify-center pt-4">
+                  <div className="flex w-full max-w-md flex-col px-4">
+                    {children}
+                  </div>
                 </div>
-              </div>
-            </main>
-          </TRPCReactProvider>
-        </MantineProvider>
+              </main>
+            </TRPCReactProvider>
+          </MantineProvider>
+        </AuthProvider>
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

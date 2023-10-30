@@ -3,6 +3,7 @@ import type { WithClassName } from "$react-types";
 import { Anchor } from "@mantine/core";
 import Link from "next/link";
 import type { FC } from "react";
+import { SignInButton } from "~/app/_components/sign-in-button";
 
 type NavbarItem = {
   label: string;
@@ -27,19 +28,20 @@ const navbarItems: NavbarItem[] = [
 export const Navbar: FC<WithClassName> = ({ className }) => (
   <nav
     className={cx(
-      "flex h-16 w-screen items-center justify-center gap-4 bg-gray-200 dark:bg-gray-800",
+      "flex h-16 w-screen items-center justify-between bg-gray-200 px-2 dark:bg-gray-800",
       className,
     )}
   >
-    {navbarItems.map((item) => (
-      <Anchor
-        // className="flex w-16 justify-center rounded-sm border py-1"
-        component={Link}
-        href={item.href}
-        key={item.href}
-      >
-        {item.label}
-      </Anchor>
-    ))}
+    <div className="w-32" />
+    <div className="flex gap-4">
+      {navbarItems.map((item) => (
+        <Anchor component={Link} href={item.href} key={item.href}>
+          {item.label}
+        </Anchor>
+      ))}
+    </div>
+    <div className="flex w-32 justify-end">
+      <SignInButton />
+    </div>
   </nav>
 );

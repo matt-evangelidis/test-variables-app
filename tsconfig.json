@@ -18,6 +18,8 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
+      "@email-templates/*": ["./emails/*"],
+      "@/*": ["./src/features/*"],
       "$*": ["./src/lib/*"],
       "~/*": ["./src/*"]
     },
