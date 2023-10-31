@@ -11,11 +11,13 @@ datasource db {
 }
 
 model Post {
-    id        String   @id @default(uuid())
-    title     String
-    content   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id           String   @id @default(uuid())
+    title        String
+    content      String
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    posterUserId String
+    posterUser   User     @relation(fields: [posterUserId], references: [id], onDelete: Cascade)
 
     @@index([title])
     @@index([content])
@@ -58,6 +60,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    posts         Post[]
 }
 
 model VerificationToken {

@@ -12,6 +12,10 @@
   p {
     @apply m-0;
   }
+
+  pre {
+    @apply font-sans;
+  }
 }
 
 @layer components {

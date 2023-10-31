@@ -1,22 +1,56 @@
+import { type PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPostInputSchema } from "~/schemas";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  authenticatedProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 const POST_PAGE_SIZE = 20;
 
+const throwIfUserIsNotOwnerOfPostWithId = async (
+  postId: string,
+  userId: string,
+  db: PrismaClient,
+) => {
+  const fullPost = await db.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+  });
+
+  if (fullPost.posterUserId !== userId) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You are not the owner of this post.",
+    });
+  }
+};
+
 export const postRouter = createTRPCRouter({
-  create: publicProcedure
+  create: authenticatedProcedure
     .input(createPostInputSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.create({
-        data: input,
+        data: {
+          ...input,
+          posterUserId: ctx.session.user.id,
+        },
       });
     }),
 
-  edit: publicProcedure
+  edit: authenticatedProcedure
     .input(z.object({ postId: z.string(), data: createPostInputSchema }))
     .mutation(async ({ ctx, input }) => {
+      await throwIfUserIsNotOwnerOfPostWithId(
+        input.postId,
+        ctx.session.user.id,
+        ctx.db,
+      );
+
       return ctx.db.post.update({
         where: {
           id: input.postId,
@@ -55,15 +89,38 @@ export const postRouter = createTRPCRouter({
     return Math.ceil(count / POST_PAGE_SIZE);
   }),
 
+  userIsOwnerOfPostWithId: authenticatedProcedure
+    .input(z.string())
+    .query(async ({ input: postId, ctx }) => {
+      try {
+        await throwIfUserIsNotOwnerOfPostWithId(
+          postId,
+          ctx.session.user.id,
+          ctx.db,
+        );
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }),
+
   getById: publicProcedure.input(z.string()).query(({ input: postId, ctx }) => {
     return ctx.db.post.findUniqueOrThrow({
       where: { id: postId },
     });
   }),
 
-  deleteById: publicProcedure.input(z.string()).mutation(({ input, ctx }) => {
-    return ctx.db.post.delete({
-      where: { id: input },
-    });
-  }),
+  deleteById: authenticatedProcedure
+    .input(z.string())
+    .mutation(async ({ input, ctx }) => {
+      await throwIfUserIsNotOwnerOfPostWithId(
+        input,
+        ctx.session.user.id,
+        ctx.db,
+      );
+
+      return ctx.db.post.delete({
+        where: { id: input },
+      });
+    }),
 });

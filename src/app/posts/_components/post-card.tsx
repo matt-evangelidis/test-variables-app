@@ -1,15 +1,24 @@
 import { cx } from "$cx";
-import { type WithClassName } from "$react-types";
-import { Anchor, Text, Title } from "@mantine/core";
+import { type NextServerPage, type WithClassName } from "$react-types";
+import { Divider, Text } from "@mantine/core";
 import type { Post } from "@prisma/client";
 import Link from "next/link";
-import { type FC } from "react";
 import { TimeStamp } from "~/components/time-stamp";
+import { db } from "~/server/db";
 
-export const PostCard: FC<WithClassName & { post: Post }> = ({
+export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
   className,
   post,
 }) => {
+  const { email: posterEmail } = await db.user.findUniqueOrThrow({
+    where: {
+      id: post.posterUserId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
   return (
     <div
       className={cx(
@@ -17,17 +26,30 @@ export const PostCard: FC<WithClassName & { post: Post }> = ({
         className,
       )}
     >
-      <div className="flex w-full justify-between">
+      <div className="w-full">
         <Text
-          className="link-overlay-anchor text-lg hover:underline"
+          className="link-overlay-anchor text-lg font-bold hover:underline"
           component={Link}
           href={`/posts/${post.id}`}
         >
           {post.title}
         </Text>
-        <TimeStamp size="sm" considerDistanceFromNow date={post.createdAt} />
+        <div className="items-bottom mt-1 flex w-full justify-between">
+          <Text size="xs" className="opacity-60">
+            {posterEmail}
+          </Text>
+          <TimeStamp
+            size="xs"
+            className="opacity-60"
+            considerDistanceFromNow
+            date={post.createdAt}
+          />
+        </div>
       </div>
-      <Text>{post.content}</Text>
+      <Divider className="mb-4 mt-2 !border-t-textColor opacity-90" />
+      <Text component="pre" className="text-textColor">
+        {post.content}
+      </Text>
     </div>
   );
 };

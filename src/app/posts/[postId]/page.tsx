@@ -3,28 +3,45 @@ import { Button } from "@mantine/core";
 import { Text, Title } from "@mantine/core";
 import Link from "next/link";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
+import { getServerAuthSession } from "~/server/auth";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
   const { postId } = individualPostPageParamsSchema.parse(params);
   const post = await api.post.getById.query(postId);
+  const authSession = await getServerAuthSession();
+
+  const { email: posterEmail } = await db.user.findUniqueOrThrow({
+    where: {
+      id: post.posterUserId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
   return (
     <>
-      <div className="flex justify-between">
-        <Title order={1} className="mb-4">
-          {post.title}
-        </Title>
-        <Button
-          component={Link}
-          href={`/posts/${postId}/edit`}
-          variant="subtle"
-          size="sm"
-        >
-          Edit
-        </Button>
+      <div className="mb-4 flex flex-col">
+        <Title order={1}>{post.title}</Title>
+        <div className="flex w-full items-center justify-between">
+          <Text size="sm">{posterEmail}</Text>
+          {authSession?.user?.id === post.posterUserId && (
+            <Button
+              component={Link}
+              href={`/posts/${postId}/edit`}
+              variant="subtle"
+              size="xs"
+              className="ml-auto"
+            >
+              Edit
+            </Button>
+          )}
+        </div>
       </div>
       <div className="w-full rounded-md bg-gray-200 p-man_md dark:bg-gray-800">
-        <Text>{post.content}</Text>
+        <Text component="pre">{post.content}</Text>
       </div>
     </>
   );

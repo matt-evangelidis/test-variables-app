@@ -103,7 +103,11 @@ export const PostForm: FC<PostFormProps> = ({ status }) => {
         />
         <div className="flex w-full gap-2">
           {status.mode === "edit" && (
-            <Button color="red" onClick={() => setDeleteModalIsOpen(true)}>
+            <Button
+              color="red"
+              variant="outline"
+              onClick={() => setDeleteModalIsOpen(true)}
+            >
               Delete
             </Button>
           )}
