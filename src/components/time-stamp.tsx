@@ -9,7 +9,6 @@ type SmartFormattingProps = {
 export type TimeStampProps = Omit<TextProps, "children"> & {
   date: Date;
   format?: string;
-  considerDistanceFromNow?: boolean;
 } & Partial<SmartFormattingProps>;
 
 const applySmartFormatting = (

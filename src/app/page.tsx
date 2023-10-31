@@ -12,6 +12,7 @@ const LatestPost: NextPage = async () => {
 
   return <PostCard className="w-full" post={latestPost} />;
 };
+
 const Home: NextPage = () => {
   return (
     <div className="flex w-full justify-center pt-4">
