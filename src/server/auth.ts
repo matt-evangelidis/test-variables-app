@@ -7,7 +7,7 @@ import {
 import EmailProvider, {
   type SendVerificationRequestParams,
 } from "next-auth/providers/email";
-import AuthConfirmEmailTemplate from "@email-templates/auth-confirm";
+import AuthConfirmEmailTemplate from "$email-templates/auth-confirm";
 import { resend } from "$resend";
 import { db } from "~/server/db";
 import { redirect } from "next/navigation";

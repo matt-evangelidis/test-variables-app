@@ -4,7 +4,6 @@ import { Text, Title } from "@mantine/core";
 import Link from "next/link";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
 import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
@@ -12,21 +11,16 @@ const PostPage: NextServerPage = async ({ params }) => {
   const post = await api.post.getById.query(postId);
   const authSession = await getServerAuthSession();
 
-  const { email: posterEmail } = await db.user.findUniqueOrThrow({
-    where: {
-      id: post.posterUserId,
-    },
-    select: {
-      email: true,
-    },
-  });
+  const userDisplayName = await api.user.getPreferredDisplayNameWithId.query(
+    post.posterUserId,
+  );
 
   return (
     <>
       <div className="mb-4 flex flex-col">
         <Title order={1}>{post.title}</Title>
         <div className="flex w-full items-center justify-between">
-          <Text size="sm">{posterEmail}</Text>
+          <Text size="sm">{userDisplayName}</Text>
           {authSession?.user?.id === post.posterUserId && (
             <Button
               component={Link}

@@ -18,7 +18,8 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "@email-templates/*": ["./emails/*"],
+      "$prisma-schemas/*": ["./prisma/zod/*"],
+      "$email-templates/*": ["./emails/*"],
       "@/*": ["./src/features/*"],
       "$*": ["./src/lib/*"],
       "~/*": ["./src/*"]

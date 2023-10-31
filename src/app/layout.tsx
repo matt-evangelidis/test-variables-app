@@ -1,5 +1,6 @@
 import "~/styles/globals.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
@@ -18,6 +19,7 @@ import { Navbar } from "~/app/_components/navbar";
 import { type NextServerPage, type WithChildren } from "$react-types";
 import { AuthProvider } from "~/app/_components/auth-provider";
 import { getServerAuthSession } from "~/server/auth";
+import { Notifications } from "@mantine/notifications";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,6 +49,7 @@ const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
             cssVariablesResolver={mantineCssVariablesResolver}
             defaultColorScheme={DEFAULT_COLOR_SCHEME}
           >
+            <Notifications position="top-left" />
             <TRPCReactProvider headers={headers()}>
               <Navbar className="fixed top-0" />
               <main className="min-h-screen w-full pt-navbarHeight">

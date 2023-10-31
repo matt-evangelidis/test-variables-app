@@ -4,20 +4,15 @@ import { Divider, Text } from "@mantine/core";
 import type { Post } from "@prisma/client";
 import Link from "next/link";
 import { TimeStamp } from "~/components/time-stamp";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
   className,
   post,
 }) => {
-  const { email: posterEmail } = await db.user.findUniqueOrThrow({
-    where: {
-      id: post.posterUserId,
-    },
-    select: {
-      email: true,
-    },
-  });
+  const authorDisplayName = await api.user.getPreferredDisplayNameWithId.query(
+    post.posterUserId,
+  );
 
   return (
     <div
@@ -36,7 +31,7 @@ export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
         </Text>
         <div className="items-bottom mt-1 flex w-full justify-between">
           <Text size="xs" className="opacity-60">
-            {posterEmail}
+            {authorDisplayName}
           </Text>
           <TimeStamp
             size="xs"
