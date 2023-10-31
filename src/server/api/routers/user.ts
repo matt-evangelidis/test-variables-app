@@ -49,4 +49,21 @@ export const userRouter = createTRPCRouter({
 
       return name ?? email;
     }),
+
+  deleteById: authenticatedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: userId }) => {
+      if (userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only delete your own profile",
+        });
+      }
+
+      return await ctx.db.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+    }),
 });

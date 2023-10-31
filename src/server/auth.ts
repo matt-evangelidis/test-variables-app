@@ -11,6 +11,8 @@ import AuthConfirmEmailTemplate from "$email-templates/auth-confirm";
 import { resend } from "$resend";
 import { db } from "~/server/db";
 import { redirect } from "next/navigation";
+import { env } from "~/env.mjs";
+import { generateRandomUserName } from "$generateRandomUsername";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -56,6 +58,21 @@ export const authOptions = {
       },
     }),
   },
+  events: {
+    createUser: async ({ user }) => {
+      // Assign a user a default random username
+      // when they sign up
+      await db.user.update({
+        where: {
+          id: user.id,
+          name: null,
+        },
+        data: {
+          name: generateRandomUserName(),
+        },
+      });
+    },
+  },
   adapter: PrismaAdapter(db),
   providers: [
     EmailProvider({
@@ -64,6 +81,7 @@ export const authOptions = {
       sendVerificationRequest,
     }),
   ],
+  debug: env.NODE_ENV === "development",
 } satisfies AuthOptions;
 
 export const getServerAuthSession = () => baseGetServerSession(authOptions);

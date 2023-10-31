@@ -4,7 +4,8 @@ import { Button, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { type User } from "@prisma/client";
-import { signIn } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { redirect } from "next/navigation";
 import { type FC } from "react";
 import { type z } from "zod";
 import { userUpdateFormSchema } from "~/schemas";
@@ -34,6 +35,22 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
     },
   });
 
+  const deleteUser = api.user.deleteById.useMutation({
+    onSuccess: () => {
+      redirect("/");
+    },
+  });
+
+  const handleDelete = () => {
+    const userHasConfirmed = window.confirm(
+      "Are you sure you want to delete your profile? This cannot be undone.",
+    );
+
+    if (!userHasConfirmed) return;
+
+    deleteUser.mutate(user.id);
+  };
+
   return (
     <form
       className="flex w-full flex-col gap-4 [&>*]:w-full"
@@ -45,8 +62,19 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
       )}
     >
       <TextInput {...form.getInputProps("name")} label="Username" />
-      <div className="flex justify-center">
-        <Button className="w-32" type="submit" loading={updateUser.isLoading}>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          color="red"
+          onClick={handleDelete}
+          loading={deleteUser.isLoading}
+        >
+          Delete
+        </Button>
+        <Button onClick={() => signOut({})} variant="outline" color="gray">
+          Sign Out
+        </Button>
+        <Button type="submit" loading={updateUser.isLoading} className="w-full">
           Save
         </Button>
       </div>
