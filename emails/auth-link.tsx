@@ -15,12 +15,12 @@ export type AuthConfirmEmailTemplateProps = {
   confirmationUrl: string;
 };
 
-const AuthConfirmEmailTemplate = ({
+const AuthLinkEmailTemplate = ({
   confirmationUrl,
 }: AuthConfirmEmailTemplateProps) => (
   <Html>
     <Head />
-    <Preview>Confirm Email</Preview>
+    <Preview>Sign In</Preview>
     <Tailwind>
       <Body className="mx-auto my-auto bg-gray-100 font-sans">
         <Container className="w-[465px] border border-gray-200 bg-white p-4">
@@ -30,15 +30,15 @@ const AuthConfirmEmailTemplate = ({
             </Heading>
           </Container>
           <Text>
-            Welcome to Test Posts App, one of the websites of all time. To
-            confirm your email address, click the button below.
+            Welcome to Test Posts App, one of the websites of all time. To sign
+            in, click the button below.
           </Text>
           <Section className="text-center">
             <Button
               className="rounded-md bg-blue-500 px-4 py-2 text-white"
               href={confirmationUrl}
             >
-              Confirm
+              Sign In
             </Button>
           </Section>
         </Container>
@@ -46,4 +46,4 @@ const AuthConfirmEmailTemplate = ({
     </Tailwind>
   </Html>
 );
-export default AuthConfirmEmailTemplate;
+export default AuthLinkEmailTemplate;

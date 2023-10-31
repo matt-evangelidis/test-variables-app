@@ -7,7 +7,7 @@ import {
 import EmailProvider, {
   type SendVerificationRequestParams,
 } from "next-auth/providers/email";
-import AuthConfirmEmailTemplate from "$email-templates/auth-confirm";
+import AuthLinkEmailTemplate from "$email-templates/auth-link";
 import { resend } from "$resend";
 import { db } from "~/server/db";
 import { redirect } from "next/navigation";
@@ -41,8 +41,8 @@ const sendVerificationRequest = async (
   await resend.emails.send({
     from: `Test Posts <${params.provider.from}>`,
     to: params.identifier,
-    subject: "Confirm",
-    react: AuthConfirmEmailTemplate({
+    subject: "Sign In To Test Posts",
+    react: AuthLinkEmailTemplate({
       confirmationUrl: params.url,
     }),
   });

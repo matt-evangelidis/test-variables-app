@@ -14,7 +14,7 @@ const EditUserProfilePage: NextServerPage = async ({ params }) => {
   });
 
   return (
-    <AuthenticatedRoute redirectToRoot>
+    <AuthenticatedRoute>
       <UserProfileForm user={fullUser} />
     </AuthenticatedRoute>
   );

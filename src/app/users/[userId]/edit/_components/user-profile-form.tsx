@@ -1,11 +1,11 @@
 "use client";
 
+import { useCacheBustedNavigation } from "$next-helpers";
 import { Button, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { type User } from "@prisma/client";
 import { signOut } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { type FC } from "react";
 import { type z } from "zod";
 import { userUpdateFormSchema } from "~/schemas";
@@ -23,6 +23,8 @@ const useUserProfileForm = (user: User) =>
   });
 
 export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
+  const navigation = useCacheBustedNavigation();
+
   const form = useUserProfileForm(user);
 
   const updateUser = api.user.update.useMutation({
@@ -36,8 +38,9 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
   });
 
   const deleteUser = api.user.deleteById.useMutation({
-    onSuccess: () => {
-      redirect("/");
+    onSuccess: async () => {
+      navigation.replace("/");
+      await signOut();
     },
   });
 
@@ -71,7 +74,7 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
         >
           Delete
         </Button>
-        <Button onClick={() => signOut({})} variant="outline" color="gray">
+        <Button onClick={() => signOut()} variant="outline" color="gray">
           Sign Out
         </Button>
         <Button type="submit" loading={updateUser.isLoading} className="w-full">
