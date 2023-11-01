@@ -1,6 +1,7 @@
 import { cx } from "$cx";
 import type { NextServerPage, WithClassName } from "$react-types";
-import { Anchor } from "@mantine/core";
+import { Anchor, Button } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
 import { SignInButton } from "~/app/_components/sign-in-button";
 import { getServerAuthSession } from "~/server/auth";
@@ -8,7 +9,6 @@ import { getServerAuthSession } from "~/server/auth";
 type NavbarItem = {
   label: string;
   href: string;
-  authenticated?: boolean;
 };
 
 const navbarItems: NavbarItem[] = [
@@ -20,19 +20,10 @@ const navbarItems: NavbarItem[] = [
     label: "Posts",
     href: "/posts",
   },
-  {
-    label: "New Post",
-    href: "/posts/new",
-    authenticated: true,
-  },
 ];
 
 export const Navbar: NextServerPage<WithClassName> = async ({ className }) => {
   const authSession = await getServerAuthSession();
-
-  const finalNavbarItems = navbarItems.filter(
-    (item) => !item.authenticated || !!item.authenticated === !!authSession,
-  );
   return (
     <nav
       className={cx(
@@ -40,16 +31,22 @@ export const Navbar: NextServerPage<WithClassName> = async ({ className }) => {
         className,
       )}
     >
-      <div className="w-32" />
+      <div className="w-20">
+        {authSession && (
+          <Button component={Link} href="/posts/new" leftSection={<IconPlus />}>
+            Post
+          </Button>
+        )}
+      </div>
       <div className="flex gap-4">
-        {finalNavbarItems.map((item) => (
+        {navbarItems.map((item) => (
           <Anchor component={Link} href={item.href} key={item.href}>
             {item.label}
           </Anchor>
         ))}
       </div>
-      <div className="flex w-32 justify-end">
-        <SignInButton />
+      <div className="flex w-20 justify-end">
+        <SignInButton variant="subtle" />
       </div>
     </nav>
   );
