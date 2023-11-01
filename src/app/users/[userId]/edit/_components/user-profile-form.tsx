@@ -3,16 +3,16 @@
 import { Button, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { type User } from "@prisma/client";
 import { signOut } from "next-auth/react";
 import { type FC } from "react";
 import { type z } from "zod";
+import { type InwardFacingUserDTO } from "~/dtos";
 import { userUpdateFormSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 
 const resolver = zodResolver(userUpdateFormSchema);
 
-const useUserProfileForm = (user: User) =>
+const useUserProfileForm = (user: InwardFacingUserDTO) =>
   useForm<z.infer<typeof userUpdateFormSchema>>({
     validate: resolver,
     initialValues: {
@@ -21,7 +21,9 @@ const useUserProfileForm = (user: User) =>
     },
   });
 
-export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
+export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
+  user,
+}) => {
   const form = useUserProfileForm(user);
 
   const updateUser = api.user.update.useMutation({

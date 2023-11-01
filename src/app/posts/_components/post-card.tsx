@@ -10,10 +10,7 @@ export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
   className,
   post,
 }) => {
-  const authorDisplayName = await api.user.getPreferredDisplayNameWithId.query(
-    post.posterUserId,
-  );
-
+  const authorName = await api.user.getUsernameWithId.query(post.posterUserId);
   return (
     <div
       className={cx(
@@ -31,7 +28,7 @@ export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
         </Text>
         <div className="items-bottom mt-1 flex w-full justify-between">
           <Text size="xs" className="opacity-60">
-            {authorDisplayName}
+            {authorName}
           </Text>
           <TimeStamp
             size="xs"

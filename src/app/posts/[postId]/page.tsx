@@ -11,7 +11,7 @@ const PostPage: NextServerPage = async ({ params }) => {
   const post = await api.post.getById.query(postId);
   const authSession = await getServerAuthSession();
 
-  const userDisplayName = await api.user.getPreferredDisplayNameWithId.query(
+  const userDisplayName = await api.user.getUsernameWithId.query(
     post.posterUserId,
   );
 

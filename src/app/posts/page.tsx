@@ -29,13 +29,13 @@ const paginationParamsSchema = z.object({
 const PostListPage: NextServerPage = async ({
   searchParams: untypedSearchParams,
 }) => {
-  const searchparams = paginationParamsSchema.parse(untypedSearchParams);
+  const searchParams = paginationParamsSchema.parse(untypedSearchParams);
 
   const postList = await api.post.getNewestPaginated.query({
-    page: searchparams.page,
+    page: searchParams.page,
   });
 
-  const thisIsTheOnlyPage = searchparams.page === 1 && !postList.hasMore;
+  const thisIsTheOnlyPage = searchParams.page === 1 && !postList.hasMore;
   return (
     <>
       <h2 className="mb-8">Latest Posts</h2>
@@ -48,7 +48,7 @@ const PostListPage: NextServerPage = async ({
         <Suspense>
           <PostListPagination
             className="mx-auto"
-            currentPage={searchparams.page}
+            currentPage={searchParams.page}
           />
         </Suspense>
       )}

@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { postDTOSchema } from "~/dtos";
 import { createPostInputSchema } from "~/schemas";
 
 import {
@@ -33,6 +34,7 @@ const throwIfUserIsNotOwnerOfPostWithId = async (
 export const postRouter = createTRPCRouter({
   create: authenticatedProcedure
     .input(createPostInputSchema)
+    .output(postDTOSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.create({
         data: {
@@ -44,6 +46,7 @@ export const postRouter = createTRPCRouter({
 
   edit: authenticatedProcedure
     .input(z.object({ postId: z.string(), data: createPostInputSchema }))
+    .output(postDTOSchema)
     .mutation(async ({ ctx, input }) => {
       await throwIfUserIsNotOwnerOfPostWithId(
         input.postId,
@@ -59,16 +62,24 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getLatest: publicProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-    });
-  }),
+  getLatest: publicProcedure
+    .output(postDTOSchema.nullable())
+    .query(({ ctx }) => {
+      return ctx.db.post.findFirst({
+        orderBy: { createdAt: "desc" },
+      });
+    }),
 
   getNewestPaginated: publicProcedure
     .input(
       z.object({
         page: z.number().int().min(1),
+      }),
+    )
+    .output(
+      z.object({
+        posts: z.array(postDTOSchema),
+        hasMore: z.boolean(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -112,6 +123,7 @@ export const postRouter = createTRPCRouter({
 
   deleteById: authenticatedProcedure
     .input(z.string())
+    .output(postDTOSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfUserIsNotOwnerOfPostWithId(
         input,

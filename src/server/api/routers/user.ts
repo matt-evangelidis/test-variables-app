@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { inwardFacingUserDTOSchema, outwardFacingUserDTOSchema } from "~/dtos";
 import { userUpdateFormSchema } from "~/schemas";
 import {
   authenticatedProcedure,
@@ -15,6 +16,7 @@ export const userRouter = createTRPCRouter({
         data: userUpdateFormSchema,
       }),
     )
+    .output(inwardFacingUserDTOSchema)
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.id !== input.userId) {
         throw new TRPCError({
@@ -33,25 +35,46 @@ export const userRouter = createTRPCRouter({
       return result;
     }),
 
-  getPreferredDisplayNameWithId: publicProcedure
+  getOutwardFacingById: publicProcedure
     .input(z.string())
-    .output(z.string())
-    .query(async ({ input, ctx }) => {
-      const { email, name } = await ctx.db.user.findUniqueOrThrow({
+    .output(outwardFacingUserDTOSchema)
+    .query(async ({ input: userToFetchId, ctx }) =>
+      ctx.db.user.findUniqueOrThrow({ where: { id: userToFetchId } }),
+    ),
+
+  getInwardFacingById: authenticatedProcedure
+    .input(z.string())
+    .output(inwardFacingUserDTOSchema)
+    .query(({ input: userToFetchId, ctx }) => {
+      if (ctx.session.user.id !== userToFetchId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only view your own profile",
+        });
+      }
+
+      return ctx.db.user.findUniqueOrThrow({ where: { id: userToFetchId } });
+    }),
+
+  getUsernameWithId: publicProcedure
+    .input(z.string())
+    .output(z.string().nullable())
+    .query(async ({ input: userId, ctx }) => {
+      const { name } = await ctx.db.user.findUniqueOrThrow({
         where: {
-          id: input,
+          id: userId,
         },
         select: {
-          email: true,
           name: true,
         },
       });
 
-      return name ?? email;
+      return name;
     }),
 
   deleteById: authenticatedProcedure
     .input(z.string())
+    .output(inwardFacingUserDTOSchema)
     .mutation(async ({ ctx, input: userId }) => {
       if (userId !== ctx.session.user.id) {
         throw new TRPCError({
