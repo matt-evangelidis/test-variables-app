@@ -3,16 +3,13 @@
 import { useCacheBustedNavigation } from "$next-helpers";
 import { type WithClassName } from "$react-types";
 import { Button, type ButtonProps } from "@mantine/core";
-import { signIn, useSession } from "next-auth/react";
-import { useEffect, type FC } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { type FC } from "react";
 
 export const SignInButton: FC<WithClassName> = ({ className }) => {
   const session = useSession();
   const navigation = useCacheBustedNavigation();
-
-  useEffect(() => {
-    console.log("(sign-in-button) Rendered!", { session });
-  });
 
   if (session.status === "loading") return null;
 
@@ -23,7 +20,7 @@ export const SignInButton: FC<WithClassName> = ({ className }) => {
 
   if (session.status === "unauthenticated")
     return (
-      <Button {...sharedButtonProps} onClick={() => signIn()}>
+      <Button {...sharedButtonProps} component={Link} href={"/auth/sign-in"}>
         Sign In
       </Button>
     );

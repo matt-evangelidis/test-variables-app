@@ -89,4 +89,20 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
+
+  getIdOfUserWithEmailIfItExists: publicProcedure
+    .input(z.string().email())
+    .output(z.string().nullable())
+    .mutation(async ({ input: emailToCheck, ctx }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          email: emailToCheck,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      return user?.id ?? null;
+    }),
 });

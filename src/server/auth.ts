@@ -88,8 +88,11 @@ export const authOptions = {
     }),
   ],
   debug: env.NODE_ENV === "development",
+  pages: {
+    signIn: "/auth/sign-in",
+  },
 } satisfies AuthOptions;
 
 export const getServerAuthSession = () => baseGetServerSession(authOptions);
 
-export const redirectToSignIn = () => redirect("/api/auth/signin");
+export const redirectToSignIn = () => redirect(authOptions.pages.signIn);
