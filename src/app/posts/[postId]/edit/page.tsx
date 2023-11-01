@@ -9,7 +9,7 @@ const EditPostPage: NextServerPage = async ({ params }) => {
   const fullPost = await api.post.getById.query(postId);
 
   return (
-    <AuthenticatedRoute>
+    <AuthenticatedRoute userMustHaveId={fullPost.posterUserId}>
       <PostForm
         status={{
           mode: "edit",

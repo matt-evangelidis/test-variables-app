@@ -1,6 +1,5 @@
 "use client";
 
-import { useCacheBustedNavigation } from "$next-helpers";
 import { Button, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
@@ -23,8 +22,6 @@ const useUserProfileForm = (user: User) =>
   });
 
 export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
-  const navigation = useCacheBustedNavigation();
-
   const form = useUserProfileForm(user);
 
   const updateUser = api.user.update.useMutation({
@@ -39,8 +36,9 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
 
   const deleteUser = api.user.deleteById.useMutation({
     onSuccess: async () => {
-      navigation.replace("/");
-      await signOut();
+      await signOut({
+        callbackUrl: "/",
+      });
     },
   });
 
@@ -65,21 +63,27 @@ export const UserProfileForm: FC<{ user: User }> = ({ user }) => {
       )}
     >
       <TextInput {...form.getInputProps("name")} label="Username" />
-      <div className="flex gap-2">
+      <div className="w-full">
         <Button
-          variant="outline"
-          color="red"
-          onClick={handleDelete}
-          loading={deleteUser.isLoading}
+          type="submit"
+          loading={updateUser.isLoading}
+          className="mb-2 w-full"
         >
-          Delete
-        </Button>
-        <Button onClick={() => signOut()} variant="outline" color="gray">
-          Sign Out
-        </Button>
-        <Button type="submit" loading={updateUser.isLoading} className="w-full">
           Save
         </Button>
+        <div className="flex w-full gap-2 [&>*]:w-full">
+          <Button
+            variant="outline"
+            color="red"
+            onClick={handleDelete}
+            loading={deleteUser.isLoading}
+          >
+            Delete Account
+          </Button>
+          <Button onClick={() => signOut()} variant="outline" color="gray">
+            Sign Out
+          </Button>
+        </div>
       </div>
     </form>
   );

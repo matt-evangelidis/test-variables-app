@@ -5,19 +5,21 @@ import AuthenticatedRoute from "~/components/authenticated-route";
 import { db } from "~/server/db";
 
 const EditUserProfilePage: NextServerPage = async ({ params }) => {
-  const { userId } = userProfilePageParamsSchema.parse(params);
+  const { userId: profileUserId } = userProfilePageParamsSchema.parse(params);
 
-  const fullUser = await db.user.findUniqueOrThrow({
+  const fullProfileUser = await db.user.findUniqueOrThrow({
     where: {
-      id: userId,
+      id: profileUserId,
     },
   });
 
   return (
-    <AuthenticatedRoute>
-      <UserProfileForm user={fullUser} />
+    <AuthenticatedRoute userMustHaveId={profileUserId}>
+      <UserProfileForm user={fullProfileUser} />
     </AuthenticatedRoute>
   );
 };
 
 export default EditUserProfilePage;
+
+export const revalidate = 0;

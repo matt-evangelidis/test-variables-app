@@ -15,8 +15,8 @@ const LatestPost: NextPage = async () => {
 
 const Home: NextPage = () => {
   return (
-    <div className="flex w-full justify-center pt-4">
-      <div className="flex w-full max-w-md flex-col items-center px-4">
+    <div className="flex w-full justify-center">
+      <div className="flex w-full max-w-md flex-col items-center">
         <h2 className="mb-2 mr-auto">Latest Post</h2>
         <Suspense fallback={<div>Loading...</div>}>
           <LatestPost />

@@ -6,7 +6,7 @@ export const userUpdateFormSchema = userSchema
     image: true,
     name: true,
   })
-  .setKey("name", z.string());
+  .setKey("name", z.string().min(3));
 
 export const createPostInputSchema = z.object({
   title: z.string().min(1),

@@ -10,6 +10,7 @@ import { Container } from "@react-email/container";
 import { Heading } from "@react-email/heading";
 
 import * as React from "react";
+import { format } from "date-fns";
 
 export type AuthConfirmEmailTemplateProps = {
   confirmationUrl: string;
@@ -40,6 +41,12 @@ const AuthLinkEmailTemplate = ({
             >
               Sign In
             </Button>
+          </Section>
+
+          <Section className="text-right">
+            <Text className="text-xs opacity-75">
+              Sent at: {format(new Date(), "h:mm a LLLL dd yyyy")}
+            </Text>
           </Section>
         </Container>
       </Body>

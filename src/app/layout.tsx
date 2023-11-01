@@ -52,9 +52,9 @@ const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
             <Notifications position="top-left" />
             <TRPCReactProvider headers={headers()}>
               <Navbar className="fixed top-0" />
-              <main className="min-h-screen w-full pt-navbarHeight">
-                <div className="flex h-navbarHeight w-full justify-center pt-4">
-                  <div className="flex w-full max-w-md flex-col px-4">
+              <main className="min-h-screen w-full px-4 pt-navbarHeight">
+                <div className="flex w-full justify-center pt-4">
+                  <div className="flex w-full max-w-md flex-col">
                     {children}
                   </div>
                 </div>
