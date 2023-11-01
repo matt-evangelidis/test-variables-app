@@ -11,7 +11,7 @@ const PostPage: NextServerPage = async ({ params }) => {
   const post = await api.post.getById.query(postId);
   const authSession = await getServerAuthSession();
 
-  const userDisplayName = await api.user.getUsernameWithId.query(
+  const authorDisplayName = await api.user.getUsernameWithId.query(
     post.posterUserId,
   );
 
@@ -20,7 +20,7 @@ const PostPage: NextServerPage = async ({ params }) => {
       <div className="mb-4 flex flex-col">
         <Title order={1}>{post.title}</Title>
         <div className="flex w-full items-center justify-between">
-          <Text size="sm">{userDisplayName}</Text>
+          <Text size="sm">{authorDisplayName}</Text>
           {authSession?.user?.id === post.posterUserId && (
             <Button
               component={Link}

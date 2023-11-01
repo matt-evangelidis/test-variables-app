@@ -13,6 +13,7 @@ import { db } from "~/server/db";
 import { redirect } from "next/navigation";
 import { env } from "~/env.mjs";
 import { generateRandomUserName } from "$generateRandomUsername";
+import { renderAsync } from "@react-email/render";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -42,9 +43,14 @@ const sendVerificationRequest = async (
     from: `Test Posts <${params.provider.from}>`,
     to: params.identifier,
     subject: "Sign In To Test Posts",
-    react: AuthLinkEmailTemplate({
-      confirmationUrl: params.url,
-    }),
+    // react: AuthLinkEmailTemplate({
+    //   confirmationUrl: params.url,
+    // }),
+    html: await renderAsync(
+      AuthLinkEmailTemplate({
+        confirmationUrl: params.url,
+      }),
+    ),
   });
 };
 
