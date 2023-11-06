@@ -58,9 +58,23 @@ export const userRouter = createTRPCRouter({
 
   getUsernameWithId: publicProcedure
     .input(z.string())
-    .output(z.string().nullable())
-    .query(({ input: userId, ctx }) => {
-      return "usernames are WIP";
+    .output(z.string())
+    .query(async ({ input: userId, ctx }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          username: true,
+        },
+      });
+
+      if (!user)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+
+      return user.username;
     }),
 
   deleteById: authenticatedProcedure
