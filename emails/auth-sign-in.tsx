@@ -13,11 +13,13 @@ import * as React from "react";
 import { format } from "date-fns";
 
 export type AuthConfirmEmailTemplateProps = {
-  confirmationUrl: string;
+  signInUrl: string;
+  username: string;
 };
 
-const AuthLinkEmailTemplate = ({
-  confirmationUrl,
+const EmailTemplateSignIn = ({
+  signInUrl,
+  username,
 }: AuthConfirmEmailTemplateProps) => (
   <Html>
     <Head />
@@ -30,14 +32,12 @@ const AuthLinkEmailTemplate = ({
               Test Posts App
             </Heading>
           </Container>
-          <Text>
-            Welcome to Test Posts App, one of the websites of all time. To sign
-            in, click the button below.
-          </Text>
+          <Text>Hi {username}</Text>
+          <Text>Click the link below to sign in</Text>
           <Section className="text-center">
             <Button
               className="rounded-md bg-blue-500 px-4 py-2 text-white"
-              href={confirmationUrl}
+              href={signInUrl}
             >
               Sign In
             </Button>
@@ -53,4 +53,4 @@ const AuthLinkEmailTemplate = ({
     </Tailwind>
   </Html>
 );
-export default AuthLinkEmailTemplate;
+export default EmailTemplateSignIn;

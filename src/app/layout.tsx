@@ -17,9 +17,9 @@ import {
 } from "~/mantine-theme";
 import { Navbar } from "~/app/_components/navbar";
 import { type NextServerPage, type WithChildren } from "$react-types";
-import { AuthProvider } from "~/app/_components/auth-provider";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/auth/lucia";
 import { Notifications } from "@mantine/notifications";
+import { SessionProvider } from "~/auth/session-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,14 +43,14 @@ const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
         <ColorSchemeScript defaultColorScheme={DEFAULT_COLOR_SCHEME} />
       </head>
       <body className={`font-sans ${inter.variable}`}>
-        <AuthProvider session={session}>
-          <MantineProvider
-            theme={mantineThemeOverride}
-            cssVariablesResolver={mantineCssVariablesResolver}
-            defaultColorScheme={DEFAULT_COLOR_SCHEME}
-          >
-            <Notifications position="top-left" />
-            <TRPCReactProvider headers={headers()}>
+        <MantineProvider
+          theme={mantineThemeOverride}
+          cssVariablesResolver={mantineCssVariablesResolver}
+          defaultColorScheme={DEFAULT_COLOR_SCHEME}
+        >
+          <Notifications position="top-left" />
+          <TRPCReactProvider headers={headers()}>
+            <SessionProvider session={session}>
               <Navbar className="fixed top-0" />
               <main className="min-h-screen w-full px-4 pt-navbarHeight">
                 <div className="flex w-full justify-center pt-4">
@@ -59,9 +59,9 @@ const RootLayout: NextServerPage<WithChildren> = async ({ children }) => {
                   </div>
                 </div>
               </main>
-            </TRPCReactProvider>
-          </MantineProvider>
-        </AuthProvider>
+            </SessionProvider>
+          </TRPCReactProvider>
+        </MantineProvider>
       </body>
     </html>
   );

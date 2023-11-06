@@ -4,7 +4,7 @@ import { Anchor, Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
 import { SignInButton } from "~/app/_components/sign-in-button";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/auth/lucia";
 
 type NavbarItem = {
   label: string;

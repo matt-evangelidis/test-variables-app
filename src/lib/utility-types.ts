@@ -21,3 +21,5 @@ export type StrictOmit<Base, KeyToOmit extends keyof Base> = Omit<
 >;
 
 export type PromiseOrNot<T> = T | Promise<T>;
+
+export type AnyObject = Record<string, unknown>;

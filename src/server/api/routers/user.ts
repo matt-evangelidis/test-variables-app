@@ -18,7 +18,7 @@ export const userRouter = createTRPCRouter({
     )
     .output(inwardFacingUserDTOSchema)
     .mutation(async ({ input, ctx }) => {
-      if (ctx.session.user.id !== input.userId) {
+      if (ctx.session.user.userId !== input.userId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only update your own profile",
@@ -46,7 +46,7 @@ export const userRouter = createTRPCRouter({
     .input(z.string())
     .output(inwardFacingUserDTOSchema)
     .query(({ input: userToFetchId, ctx }) => {
-      if (ctx.session.user.id !== userToFetchId) {
+      if (ctx.session.user.userId !== userToFetchId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only view your own profile",
@@ -59,24 +59,15 @@ export const userRouter = createTRPCRouter({
   getUsernameWithId: publicProcedure
     .input(z.string())
     .output(z.string().nullable())
-    .query(async ({ input: userId, ctx }) => {
-      const { name } = await ctx.db.user.findUniqueOrThrow({
-        where: {
-          id: userId,
-        },
-        select: {
-          name: true,
-        },
-      });
-
-      return name;
+    .query(({ input: userId, ctx }) => {
+      return "usernames are WIP";
     }),
 
   deleteById: authenticatedProcedure
     .input(z.string())
     .output(inwardFacingUserDTOSchema)
     .mutation(async ({ ctx, input: userId }) => {
-      if (userId !== ctx.session.user.id) {
+      if (userId !== ctx.session.user.userId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only delete your own profile",

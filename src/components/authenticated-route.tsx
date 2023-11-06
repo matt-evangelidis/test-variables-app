@@ -1,7 +1,7 @@
 import { type NextServerPage, type WithChildren } from "$react-types";
 import { Alert, Anchor } from "@mantine/core";
 import { redirect } from "next/navigation";
-import { getServerAuthSession, redirectToSignIn } from "~/server/auth";
+import { getServerAuthSession, redirectToSignIn } from "~/auth/lucia";
 import { IconAlertCircle } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -22,7 +22,7 @@ const AuthenticatedRoute: NextServerPage<
   const userIsAuthenticatedButIsNotCorrectUser =
     session?.user &&
     userMustHaveId !== undefined &&
-    session.user.id !== userMustHaveId;
+    session.user.userId !== userMustHaveId;
 
   if (!session?.user) {
     if (redirectTo !== undefined) redirect(redirectTo);

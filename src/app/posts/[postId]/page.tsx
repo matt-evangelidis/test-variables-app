@@ -3,7 +3,7 @@ import { Button } from "@mantine/core";
 import { Text, Title } from "@mantine/core";
 import Link from "next/link";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/auth/lucia";
 import { api } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
@@ -12,16 +12,17 @@ const PostPage: NextServerPage = async ({ params }) => {
   const authSession = await getServerAuthSession();
 
   const authorDisplayName = await api.user.getUsernameWithId.query(
-    post.posterUserId,
+    post.authorUserId,
   );
 
+  const viewerIsAuthor = authSession?.user?.userId === post.authorUserId;
   return (
     <>
       <div className="mb-4 flex flex-col">
         <Title order={1}>{post.title}</Title>
         <div className="flex w-full items-center justify-between">
           <Text size="sm">{authorDisplayName}</Text>
-          {authSession?.user?.id === post.posterUserId && (
+          {viewerIsAuthor && (
             <Button
               component={Link}
               href={`/posts/${postId}/edit`}

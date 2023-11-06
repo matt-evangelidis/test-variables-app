@@ -1,11 +1,13 @@
 "use client";
 
+import { useCacheBustedNavigation } from "$next-helpers";
 import { Button, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { signOut } from "next-auth/react";
+import { useMutation } from "@tanstack/react-query";
 import { type FC } from "react";
 import { type z } from "zod";
+import { invalidateAuthSessionsForUserWithId } from "~/app/actions";
 import { type InwardFacingUserDTO } from "~/dtos";
 import { userUpdateFormSchema } from "~/schemas";
 import { api } from "~/trpc/react";
@@ -16,14 +18,14 @@ const useUserProfileForm = (user: InwardFacingUserDTO) =>
   useForm<z.infer<typeof userUpdateFormSchema>>({
     validate: resolver,
     initialValues: {
-      image: user.image,
-      name: user.name ?? "",
+      username: user.username ?? "",
     },
   });
 
 export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
   user,
 }) => {
+  const navigation = useCacheBustedNavigation();
   const form = useUserProfileForm(user);
 
   const updateUser = api.user.update.useMutation({
@@ -32,14 +34,6 @@ export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
         title: "Success",
         message: "User updated successfully",
         color: "green",
-      });
-    },
-  });
-
-  const deleteUser = api.user.deleteById.useMutation({
-    onSuccess: async () => {
-      await signOut({
-        callbackUrl: "/",
       });
     },
   });
@@ -54,6 +48,20 @@ export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
     deleteUser.mutate(user.id);
   };
 
+  const signOutMutation = useMutation({
+    mutationFn: invalidateAuthSessionsForUserWithId,
+    mutationKey: ["signOut"],
+    onSuccess: () => {
+      navigation.replace("/");
+    },
+  });
+
+  const deleteUser = api.user.deleteById.useMutation({
+    onSuccess: async () => {
+      await signOutMutation.mutateAsync(user.id);
+    },
+  });
+
   return (
     <form
       className="flex w-full flex-col gap-4 [&>*]:w-full"
@@ -64,7 +72,7 @@ export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
         }),
       )}
     >
-      <TextInput {...form.getInputProps("name")} label="Username" />
+      <TextInput {...form.getInputProps("username")} label="Username" />
       <div className="w-full">
         <Button
           type="submit"
@@ -82,7 +90,12 @@ export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
           >
             Delete Account
           </Button>
-          <Button onClick={() => signOut()} variant="outline" color="gray">
+          <Button
+            onClick={() => signOutMutation.mutate(user.id)}
+            loading={signOutMutation.isLoading}
+            variant="outline"
+            color="gray"
+          >
             Sign Out
           </Button>
         </div>

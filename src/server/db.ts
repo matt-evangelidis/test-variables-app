@@ -14,3 +14,17 @@ export const db =
   });
 
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+
+/**
+ * Sometimes we may have functions that perform database
+ * operations, however if those are used within a transaction,
+ * they won't work correctly because they'll be using the
+ * base `db` instance instead of the transactional one. This
+ * type is the typing of the transactional `db` instance, so
+ * we can have our functions optionally take a db instance,
+ * so when used in a transaction we just pass the transactional
+ * db instance.
+ */
+export type PassableDBClient = Parameters<
+  Parameters<typeof db.$transaction>[0]
+>[0];

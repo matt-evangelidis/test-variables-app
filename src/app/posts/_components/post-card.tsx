@@ -10,7 +10,7 @@ export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
   className,
   post,
 }) => {
-  const authorName = await api.user.getUsernameWithId.query(post.posterUserId);
+  const authorName = await api.user.getUsernameWithId.query(post.authorUserId);
   return (
     <div
       className={cx(

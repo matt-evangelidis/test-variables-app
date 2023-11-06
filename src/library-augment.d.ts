@@ -6,6 +6,10 @@ import {
 import type { Merge, PartialDeep, SetRequired } from "type-fest";
 import type { ExtractLiterals } from "$utility-types";
 
+/* ---------------------------------- */
+/*               Mantine              */
+/* ---------------------------------- */
+
 type CustomMantineColor = "primary" | "secondary";
 type ExtendedMantineColor = ExtractLiterals<
   DefaultMantineColor | CustomMantineColor

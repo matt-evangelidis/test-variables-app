@@ -28,12 +28,12 @@ import { type z } from "zod";
  */
 export const outwardFacingUserDTOSchema = userSchema.omit({
   email: true,
-  emailVerified: true,
+  email_verified: true,
 });
 export type OutwardFacingUserDTO = z.infer<typeof outwardFacingUserDTOSchema>;
 
 export const inwardFacingUserDTOSchema = userSchema.omit({
-  emailVerified: true,
+  email_verified: true,
 });
 export type InwardFacingUserDTO = z.infer<typeof inwardFacingUserDTOSchema>;
 

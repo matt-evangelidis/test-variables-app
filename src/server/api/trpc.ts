@@ -6,44 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+import { loudLog } from "$loudLog";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { type NextRequest } from "next/server";
+import { type NextResponse, type NextRequest } from "next/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/auth/lucia";
 
 import { db } from "~/server/db";
-
-/**
- * 1. CONTEXT
- *
- * This section defines the "contexts" that are available in the backend API.
- *
- * These allow you to access things when processing a request, like the database, the session, etc.
- */
-
-interface CreateContextOptions {
-  headers: Headers;
-}
-
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
- * it from here.
- *
- * Examples of things you may need it for:
- * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
- * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
- */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  const session = await getServerAuthSession();
-  return {
-    ...opts,
-    db,
-    session,
-  };
-};
 
 /**
  * This is the actual context you will use in your router. It will be used to process every request
@@ -51,12 +21,12 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: { req: NextRequest }) => {
-  // Fetch stuff that depends on the request
-
-  return await createInnerTRPCContext({
-    headers: opts.req.headers,
-  });
+export const createTRPCContext = async () => {
+  const session = await getServerAuthSession();
+  return {
+    session,
+    db,
+  };
 };
 
 /**
@@ -106,7 +76,7 @@ export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthenticated = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+  if (!ctx.session?.user || !ctx.session.user.email_verified) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({

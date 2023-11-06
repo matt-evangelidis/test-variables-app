@@ -23,7 +23,7 @@ const throwIfUserIsNotOwnerOfPostWithId = async (
     },
   });
 
-  if (fullPost.posterUserId !== userId) {
+  if (fullPost.authorUserId !== userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "You are not the owner of this post.",
@@ -39,7 +39,7 @@ export const postRouter = createTRPCRouter({
       return ctx.db.post.create({
         data: {
           ...input,
-          posterUserId: ctx.session.user.id,
+          authorUserId: ctx.session.user.userId,
         },
       });
     }),
@@ -50,7 +50,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await throwIfUserIsNotOwnerOfPostWithId(
         input.postId,
-        ctx.session.user.id,
+        ctx.session.user.userId,
         ctx.db,
       );
 
@@ -106,7 +106,7 @@ export const postRouter = createTRPCRouter({
       try {
         await throwIfUserIsNotOwnerOfPostWithId(
           postId,
-          ctx.session.user.id,
+          ctx.session.user.userId,
           ctx.db,
         );
         return true;
@@ -127,7 +127,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await throwIfUserIsNotOwnerOfPostWithId(
         input,
-        ctx.session.user.id,
+        ctx.session.user.userId,
         ctx.db,
       );
 

@@ -10,11 +10,14 @@
       },
       "type": "shell",
       "isBackground": true,
+      "runOptions": {
+        "instanceLimit": 1
+      },
       "command": "pnpm db:dev",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "new",
+        "panel": "new"
       }
     },
     {
@@ -31,6 +34,9 @@
         "echo": true,
         "reveal": "always",
         "panel": "new"
+      },
+      "runOptions": {
+        "instanceLimit": 1
       }
     },
     {
@@ -43,6 +49,24 @@
         "panel": "new"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "DB Studio",
+      "command": "pnpm db:studio",
+      "isBackground": true,
+      "type": "shell",
+      "icon": {
+        "color": "terminal.ansiMagenta",
+        "id": "symbol-structure"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
     }
   ]
 }
