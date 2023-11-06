@@ -8,8 +8,21 @@ import { getEmailVerificationTokenForUserWithId } from "~/auth/token";
 export const authRouter = createTRPCRouter({
   signUp: publicProcedure
     .input(userSignUpFormSchema)
-    .mutation(async ({ ctx, input }) =>
-      ctx.db.$transaction(async (transactionalDb) => {
+    .mutation(async ({ ctx, input }) => {
+      const existingUser = await ctx.db.user.findUnique({
+        where: {
+          email: input.email,
+        },
+      });
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "User already exists",
+        });
+      }
+
+      return ctx.db.$transaction(async (transactionalDb) => {
         const newUser = await transactionalDb.user.create({
           data: input,
         });
@@ -27,8 +40,8 @@ export const authRouter = createTRPCRouter({
         });
 
         return "ok";
-      }),
-    ),
+      });
+    }),
 
   signIn: publicProcedure
     .input(userSignInFormSchema)

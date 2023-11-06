@@ -24,11 +24,18 @@ export const SignUpForm: FC = () => {
   const form = useSignInForm();
 
   const signUpMutation = api.auth.signUp.useMutation({
-    onError: () =>
-      notifications.show({
-        message: "Failed to sign up",
-        color: "red",
-      }),
+    onError: (error) => {
+      switch (error.data?.code) {
+        case "CONFLICT":
+          form.setFieldError("email", "Email already in use");
+          break;
+        default:
+          notifications.show({
+            message: error.message,
+            color: "red",
+          });
+      }
+    },
   });
   const handleSubmit = form.onSubmit((data) => {
     signUpMutation.mutate(data);
