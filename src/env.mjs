@@ -9,13 +9,7 @@ export const env = createEnv({
   server: {
     DATABASE_PRISMA_URL: z.string().url(),
     RESEND_API_KEY: z.string(),
-    URL: z.preprocess(
-      // We use pre-process to use vercel's built in URL
-      // env variable if it's present.
-      (str) => process.env.VERCEL_URL ?? str,
-      // VERCEL_URL doesn't include `https` so it cant be validated as a URL
-      process.env.VERCEL ? z.string() : z.string().url(),
-    ),
+    URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
