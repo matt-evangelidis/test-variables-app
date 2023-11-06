@@ -65,7 +65,7 @@ export const SignUpForm: FC = () => {
           />
         </div>
         <Button type="submit" loading={signUpMutation.isLoading}>
-          Sign In
+          Submit
         </Button>
       </form>
       <div className="flex flex-col items-center">
