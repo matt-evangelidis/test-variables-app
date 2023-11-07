@@ -37,16 +37,40 @@ export const SignUpForm: FC = () => {
       }
     },
   });
+
+  const resendEmailMutation = api.auth.resendSignUpEmail.useMutation({
+    onSuccess: () => {
+      notifications.show({
+        message: "Email resent",
+        color: "green",
+      });
+    },
+  });
+
   const handleSubmit = form.onSubmit((data) => {
     signUpMutation.mutate(data);
   });
 
   if (signUpMutation.isSuccess)
     return (
-      <Alert color="green" title="Email Sent">
-        An email has been sent to {form.values.email}. Please check your inbox,
-        and click the link in the email to sign in.
-      </Alert>
+      <div className="flex flex-col items-center gap-4">
+        <Alert color="green" title="Email Sent">
+          An email has been sent to {form.values.email}. Please check your
+          inbox, and click the link in the email to sign in.
+        </Alert>
+
+        <div className="flex flex-col items-center">
+          <Text size="xs">Haven{"'"}t received an email?</Text>
+          <Button
+            variant="subtle"
+            size="xs"
+            onClick={() => resendEmailMutation.mutate(form.values)}
+            disabled={resendEmailMutation.isLoading}
+          >
+            Resend
+          </Button>
+        </div>
+      </div>
     );
 
   return (

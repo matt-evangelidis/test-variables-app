@@ -2,6 +2,7 @@ import { type EmailVerificationClaim } from "@prisma/client";
 import { type PassableDBClient, db as standardDb } from "~/server/db";
 import { generateRandomString, isWithinExpiration } from "lucia/utils";
 import { addMilliseconds } from "date-fns";
+import { env } from "~/env.mjs";
 
 export const TOKEN_LIFE_SPAN_MS = 1000 * 60 * 60 * 2; // 2 hours
 
@@ -77,3 +78,6 @@ export const consumeEmailVerificationTokenAndReturnUserId = async (
 
   return fullClaim.user_id;
 };
+
+export const composeTokenLink = (token: string) =>
+  `${env.URL}/auth/verify?token=${token}`;

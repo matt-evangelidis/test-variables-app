@@ -3,7 +3,11 @@ import { env } from "~/env.mjs";
 import { userSignInFormSchema, userSignUpFormSchema } from "~/schemas";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { sendConfirmationEmail, sendSignInEmail } from "~/auth/email";
-import { getEmailVerificationTokenForUserWithId } from "~/auth/token";
+import {
+  composeTokenLink,
+  getEmailVerificationTokenForUserWithId,
+} from "~/auth/token";
+import { isWithinExpiration } from "lucia/utils";
 
 export const authRouter = createTRPCRouter({
   signUp: publicProcedure
@@ -41,6 +45,54 @@ export const authRouter = createTRPCRouter({
 
         return "ok";
       });
+    }),
+
+  resendSignUpEmail: publicProcedure
+    .input(userSignUpFormSchema)
+    .mutation(async ({ input, ctx }) => {
+      const fullUser = await ctx.db.user.findUnique({
+        where: {
+          email: input.email,
+        },
+        select: {
+          email_verified: true,
+          username: true,
+          id: true,
+        },
+      });
+
+      if (!fullUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const userVerificationClaims =
+        await ctx.db.emailVerificationClaim.findMany({
+          where: {
+            user_id: fullUser.id,
+          },
+        });
+
+      const validClaim = userVerificationClaims.find((claim) => {
+        const tokenExpiresAtMs = claim.expires.getTime();
+        const tokenHasExpired = !isWithinExpiration(tokenExpiresAtMs);
+        return !tokenHasExpired;
+      });
+
+      if (fullUser.email_verified || !validClaim) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
+      }
+
+      await sendConfirmationEmail({
+        to: input.email,
+        verificationLink: composeTokenLink(validClaim.token),
+        username: fullUser.username,
+      });
+
+      return "ok";
     }),
 
   signIn: publicProcedure

@@ -7,6 +7,8 @@ import { type FC, useState } from "react";
 
 import { type AppRouter } from "~/server/api/root";
 import { getTRPCHandlerUrl, transformer } from "./shared";
+import { notifications } from "@mantine/notifications";
+import { extractErrorMessage } from "$extract-error-message";
 
 export const api = createTRPCReact<AppRouter>();
 
@@ -19,7 +21,21 @@ export const TRPCReactProvider: FC<TRPCReactProviderProps> = ({
   children,
   headers,
 }) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          mutations: {
+            onError: (error) => {
+              notifications.show({
+                message: extractErrorMessage(error),
+                color: "red",
+              });
+            },
+          },
+        },
+      }),
+  );
 
   const [trpcClient] = useState(() =>
     api.createClient({
