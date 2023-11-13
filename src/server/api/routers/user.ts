@@ -7,6 +7,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
+import { adminService } from "~/services/admin";
 
 export const userRouter = createTRPCRouter({
   update: authenticatedProcedure
@@ -29,7 +30,14 @@ export const userRouter = createTRPCRouter({
         where: {
           id: input.userId,
         },
-        data: input.data,
+        data: {
+          ...input.data,
+          pictureKey: input.data.pictureKey ?? null,
+        },
+      });
+
+      adminService.deleteDanglingUserPictures().catch((e) => {
+        console.error("Failed to delete dangling user pictures", e);
       });
 
       return result;
@@ -39,13 +47,18 @@ export const userRouter = createTRPCRouter({
     .input(z.string())
     .output(outwardFacingUserDTOSchema)
     .query(async ({ input: userToFetchId, ctx }) =>
-      ctx.db.user.findUniqueOrThrow({ where: { id: userToFetchId } }),
+      ctx.db.user.findUniqueOrThrow({
+        where: { id: userToFetchId },
+        include: {
+          picture: true,
+        },
+      }),
     ),
 
   getInwardFacingById: authenticatedProcedure
     .input(z.string())
     .output(inwardFacingUserDTOSchema)
-    .query(({ input: userToFetchId, ctx }) => {
+    .query(async ({ input: userToFetchId, ctx }) => {
       if (ctx.session.user.userId !== userToFetchId) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -53,12 +66,29 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      return ctx.db.user.findUniqueOrThrow({ where: { id: userToFetchId } });
+      const profile = await ctx.db.user.findUnique({
+        where: { id: userToFetchId },
+        include: { picture: true },
+      });
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      return profile;
     }),
 
-  getUsernameWithId: publicProcedure
+  getUserAuthorDisplayInfo: publicProcedure
     .input(z.string())
-    .output(z.string())
+    .output(
+      z.object({
+        username: z.string(),
+        pictureUrl: z.string().url().optional(),
+      }),
+    )
     .query(async ({ input: userId, ctx }) => {
       const user = await ctx.db.user.findUnique({
         where: {
@@ -66,6 +96,11 @@ export const userRouter = createTRPCRouter({
         },
         select: {
           username: true,
+          picture: {
+            select: {
+              url: true,
+            },
+          },
         },
       });
 
@@ -74,7 +109,10 @@ export const userRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      return user.username;
+      return {
+        username: user.username,
+        pictureUrl: user.picture?.url,
+      };
     }),
 
   deleteById: authenticatedProcedure
@@ -93,21 +131,5 @@ export const userRouter = createTRPCRouter({
           id: userId,
         },
       });
-    }),
-
-  getIdOfUserWithEmailIfItExists: publicProcedure
-    .input(z.string().email())
-    .output(z.string().nullable())
-    .mutation(async ({ input: emailToCheck, ctx }) => {
-      const user = await ctx.db.user.findUnique({
-        where: {
-          email: emailToCheck,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      return user?.id ?? null;
     }),
 });

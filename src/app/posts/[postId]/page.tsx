@@ -1,9 +1,11 @@
 import type { NextServerPage } from "$react-types";
-import { Button } from "@mantine/core";
+import { Button, Divider, Paper } from "@mantine/core";
 import { Text, Title } from "@mantine/core";
 import Link from "next/link";
+import { UserBadge } from "~/app/_components/user-badge";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
 import { getServerAuthSession } from "~/auth/lucia";
+import { TimeStamp } from "~/components/time-stamp";
 import { api } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
@@ -11,17 +13,14 @@ const PostPage: NextServerPage = async ({ params }) => {
   const post = await api.post.getById.query(postId);
   const authSession = await getServerAuthSession();
 
-  const authorDisplayName = await api.user.getUsernameWithId.query(
-    post.authorUserId,
-  );
-
   const viewerIsAuthor = authSession?.user?.userId === post.authorUserId;
   return (
     <>
-      <div className="mb-4 flex flex-col">
+      <div className="flex flex-col">
         <Title order={1}>{post.title}</Title>
+        <TimeStamp date={post.createdAt} considerDistanceFromNow />
         <div className="flex w-full items-center justify-between">
-          <Text size="sm">{authorDisplayName}</Text>
+          <UserBadge userId={post.authorUserId} size="sm" />
           {viewerIsAuthor && (
             <Button
               component={Link}
@@ -35,9 +34,10 @@ const PostPage: NextServerPage = async ({ params }) => {
           )}
         </div>
       </div>
-      <div className="w-full rounded-md bg-gray-200 p-man_md dark:bg-gray-800">
+      <Divider my="md" />
+      <Paper radius="md" p="sm" w="100%">
         <Text component="pre">{post.content}</Text>
-      </div>
+      </Paper>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import { postSchema } from "$prisma-schemas/post";
-import { userSchema } from "$prisma-schemas/user";
 import { type z } from "zod";
+import { relatedUserSchema } from "~/related-schemas";
 
 /**
  * "DTO" stands for "data transfer object". Often when dealing with
@@ -26,14 +26,16 @@ import { type z } from "zod";
  * "outward facing" refers to any instance where a user's information
  * is going to be exposed to other users.
  */
-export const outwardFacingUserDTOSchema = userSchema.omit({
+export const outwardFacingUserDTOSchema = relatedUserSchema.omit({
   email: true,
   email_verified: true,
+  posts: true,
 });
 export type OutwardFacingUserDTO = z.infer<typeof outwardFacingUserDTOSchema>;
 
-export const inwardFacingUserDTOSchema = userSchema.omit({
+export const inwardFacingUserDTOSchema = relatedUserSchema.omit({
   email_verified: true,
+  posts: true,
 });
 export type InwardFacingUserDTO = z.infer<typeof inwardFacingUserDTOSchema>;
 

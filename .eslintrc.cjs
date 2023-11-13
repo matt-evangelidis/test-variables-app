@@ -1,3 +1,5 @@
+const externalLibs = ["react-query-kit", "browser-webp-converter"];
+
 /** @type {import("eslint").Linter.Config} */
 const config = {
   parser: "@typescript-eslint/parser",
@@ -11,6 +13,23 @@ const config = {
     "plugin:@typescript-eslint/stylistic-type-checked",
   ],
   ignorePatterns: ["prisma/zod"],
+  overrides: [
+    {
+      // All files at `src/lib/*external-lib*`
+      files: externalLibs.flatMap((lib) => [
+        `src/lib/${lib}`,
+        `src/lib/${lib}/**/*`,
+      ]),
+      rules: {
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+      },
+    },
+  ],
   rules: {
     // These opinionated rules are enabled in stylistic-type-checked above.
     // Feel free to reconfigure them to your own preference.

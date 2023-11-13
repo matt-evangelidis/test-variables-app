@@ -8,11 +8,13 @@ export type WithClassName = {
 
 export type WithChildren = PropsWithChildren;
 
-export type NextServerComponentProps = {
+export type NextServerPageProps = {
   params?: Record<string, string>;
   searchParams?: Record<string, string | string[] | undefined>;
 };
 
 export type NextServerPage<
   Props extends Record<string, unknown> = EmptyObject,
-> = NextPage<Props & NextServerComponentProps>;
+> = NextPage<Props & NextServerPageProps>;
+
+export type NextServerComponent<Props = EmptyObject> = NextPage<Props>;

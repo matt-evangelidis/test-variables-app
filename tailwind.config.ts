@@ -1,4 +1,5 @@
 import { type Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 import {
   MANTINE_COLOR_NAMES,
   TAILWIND_COLOR_SHADES,
@@ -6,6 +7,7 @@ import {
   MANTINE_SPECIAL_COLORS,
   MANTINE_SIZES,
 } from "./src/lib/theme-helpers";
+import { withUt } from "uploadthing/tw";
 
 const generateTailwindColorSetForMantineColor = (colorName: string) => {
   const colorSet: Record<string, string> = {};
@@ -60,7 +62,7 @@ const mantineSpacingEntries = composeMantineSizeTwEntries("spacing", {
   twKeyPrefix: "man_",
 });
 
-export default {
+export default withUt({
   content: ["./src/**/*.tsx"],
   darkMode: ["class", '[data-mantine-color-scheme="dark"]'],
   corePlugins: {
@@ -93,8 +95,21 @@ export default {
       maxWidth: mantineSpacingEntries,
     },
   },
-  plugins: [],
-} satisfies Config;
+  plugins: [
+    plugin(({ addVariant }) => {
+      addVariant("hover-focus", ["&:hover", "&:focus-visible"]);
+      addVariant("hover-focus-within", ["&:hover", "&:has(:focus-visible)"]);
+      addVariant("group-hover-focus", [
+        ":merge(.group):hover &",
+        ":merge(.group):focus-visible &",
+      ]);
+      addVariant("group-hover-focus-within", [
+        ":merge(.group):hover &",
+        ":merge(.group):has(:focus-visible) &",
+      ]);
+    }),
+  ],
+} satisfies Config);
 
 /**
  * NOTE: We apply a prefix to the mantine spacing keys because mantine's

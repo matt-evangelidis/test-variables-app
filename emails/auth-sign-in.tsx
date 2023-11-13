@@ -23,7 +23,7 @@ const EmailTemplateSignIn = ({
 }: AuthConfirmEmailTemplateProps) => (
   <Html>
     <Head />
-    <Preview>Sign In</Preview>
+    <Preview>Hi {username}</Preview>
     <Tailwind>
       <Body className="mx-auto my-auto bg-gray-100 font-sans">
         <Container className="w-[465px] border border-gray-200 bg-white p-4">

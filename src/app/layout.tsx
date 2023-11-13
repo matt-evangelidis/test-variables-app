@@ -1,6 +1,7 @@
-import "~/styles/globals.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "~/styles/globals.css";
+import "~/styles/mantine-customisation.css";
 
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";

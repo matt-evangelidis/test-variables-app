@@ -21,15 +21,14 @@ datasource db {
 model Post {
     id String @id @default(uuid())
 
-    /// @zod.min(1).max(64)
-    title   String
-    /// @zod.min(1).max(1024)
-    content String
+    title   String /// @zod.min(1).max(64)
+    content String /// @zod.min(1).max(1024)
 
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     authorUserId String
-    autor        User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+    autor        User   @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
 
     @@index([title])
     @@index([content])
@@ -40,16 +39,17 @@ model Post {
 model User {
     id String @id @unique @default(uuid())
 
-    /// @zod.email()
-    email          String  @unique
+    email          String  @unique /// @zod.email()
     email_verified Boolean @default(false)
 
-    /// @zod.min(3).max(24)
-    username String
+    username String /// @zod.min(3).max(24)
+
+    pictureKey String?
+    picture    UploadedImage? @relation(fields: [pictureKey], references: [key])
 
     auth_session              Session[]
     key                       Key[]
-    Post                      Post[]
+    posts                     Post[]
     email_verification_claims EmailVerificationClaim[]
 }
 
@@ -70,6 +70,15 @@ model Key {
     user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
     @@index([user_id])
+}
+
+model UploadedImage {
+    key           String  @id @unique
+    url           String /// @zod.url()
+    size          Int
+    isUserPicture Boolean @default(false)
+
+    beingUsedByUsers User[]
 }
 
 // A "claim" represents a user entering their email into the system

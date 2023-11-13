@@ -12,6 +12,7 @@ export const userSignInFormSchema = userSchema.pick({
 
 export const userUpdateFormSchema = userSchema.pick({
   username: true,
+  pictureKey: true,
 });
 
 export const createPostInputSchema = postSchema.pick({
