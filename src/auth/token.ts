@@ -4,8 +4,6 @@ import { generateRandomString, isWithinExpiration } from "lucia/utils";
 import { addMilliseconds } from "date-fns";
 import { env } from "~/env.mjs";
 
-export const TOKEN_LIFE_SPAN_MS = 1000 * 60 * 60 * 2; // 2 hours
-
 const ONE_HOUR_MS = 1000 * 60 * 60;
 
 const TOKEN_LENGTH = 63;
@@ -37,7 +35,12 @@ export const getEmailVerificationTokenForUserWithId = async (
   if (reusableClaim) return reusableClaim.token;
 
   const newToken = generateNewToken();
-  const tokenLifespanFromNow = addMilliseconds(new Date(), TOKEN_LIFE_SPAN_MS);
+
+  const now = new Date();
+  const tokenLifespanFromNow = addMilliseconds(
+    now,
+    env.EMAIL_CLAIM_LIFETIME_MS,
+  );
 
   await db.emailVerificationClaim.create({
     data: {

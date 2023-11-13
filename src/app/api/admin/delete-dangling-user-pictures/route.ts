@@ -39,3 +39,5 @@ export const DELETE = async () => {
     deletedImages: deleteResult.count,
   });
 };
+
+export const GET = DELETE; // Required for vercel cron jobs

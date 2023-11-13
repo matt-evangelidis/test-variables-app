@@ -14,6 +14,11 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     ADMIN_KEY: z.string(),
+    EMAIL_CLAIM_LIFETIME_MS: z
+      .number()
+      .int()
+      .min(1000 * 60),
+    // If the lifetime is less than 1 minute that must be a mistake
   },
 
   /**
@@ -35,7 +40,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     URL: process.env.URL,
     ADMIN_KEY: process.env.ADMIN_KEY,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    EMAIL_CLAIM_LIFETIME_MS: process.env.EMAIL_CLAIM_LIFETIME_MS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
