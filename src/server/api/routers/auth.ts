@@ -8,6 +8,11 @@ import {
   getEmailVerificationTokenForUserWithId,
 } from "~/auth/token";
 import { isWithinExpiration } from "lucia/utils";
+import { type EmailVerificationClaim } from "@prisma/client";
+import isFuture from "date-fns/isFuture";
+
+const emailClaimIsValid = (claim: EmailVerificationClaim) =>
+  isFuture(claim.expires);
 
 export const authRouter = createTRPCRouter({
   signUp: publicProcedure
@@ -17,9 +22,19 @@ export const authRouter = createTRPCRouter({
         where: {
           email: input.email,
         },
+        include: {
+          email_verification_claims: true,
+        },
       });
 
-      if (existingUser) {
+      const userHasAlreadySignedUp =
+        !!existingUser && existingUser.email_verified;
+
+      const weAreWaitingForUserToVerifyEmail =
+        !!existingUser &&
+        existingUser.email_verification_claims.some(emailClaimIsValid);
+
+      if (userHasAlreadySignedUp || weAreWaitingForUserToVerifyEmail) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "User already exists",
@@ -27,20 +42,34 @@ export const authRouter = createTRPCRouter({
       }
 
       return ctx.db.$transaction(async (transactionalDb) => {
-        const newUser = await transactionalDb.user.create({
-          data: input,
-        });
+        const now = new Date();
+        if (!!existingUser) {
+          await transactionalDb.emailVerificationClaim.deleteMany({
+            where: {
+              user_id: existingUser.id,
+              expires: {
+                gte: now,
+              },
+            },
+          });
+        }
+
+        const user =
+          existingUser ??
+          (await transactionalDb.user.create({
+            data: input,
+          }));
 
         const newToken = await getEmailVerificationTokenForUserWithId(
-          newUser.id,
+          user.id,
           transactionalDb,
         );
         const verificationLink = `${env.URL}/auth/verify?token=${newToken}`;
 
         await sendConfirmationEmail({
-          to: newUser.email,
+          to: user.email,
           verificationLink,
-          username: newUser.username,
+          username: user.username,
         });
 
         return "ok";
