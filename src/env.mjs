@@ -14,7 +14,7 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     ADMIN_KEY: z.string(),
-    EMAIL_CLAIM_LIFETIME_MS: z
+    EMAIL_CLAIM_LIFETIME_MS: z.coerce
       .number()
       .int()
       .min(1000 * 60),
