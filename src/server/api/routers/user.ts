@@ -32,7 +32,7 @@ export const userRouter = createTRPCRouter({
         },
         data: {
           ...input.data,
-          pictureKey: input.data.pictureKey ?? null,
+          pictureKey: input.data.pictureKey,
         },
       });
 

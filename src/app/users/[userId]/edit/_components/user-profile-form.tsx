@@ -9,22 +9,29 @@ import { type FC, useMemo, useState, useCallback } from "react";
 import { type z } from "zod";
 import { invalidateAuthSessionsForUserWithId } from "~/app/actions";
 import { UserPictureInput } from "~/app/users/[userId]/edit/_components/user-picture-input";
-import { type InwardFacingUserDTO } from "~/dtos";
+import { type OutwardFacingUserDTO, type InwardFacingUserDTO } from "~/dtos";
 import { userUpdateFormSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import { api as directApi } from "~/trpc/client";
 import { uploadFilesFromClient } from "~/uploadthing/utils";
 import { compressUserPictureFile } from "~/utils/compress-user-picture-file";
 import { waitUntilPictureWithKeyExistsInDb } from "~/utils/wait-until-picture-with-key-exists-in-db";
+import { useSessionContext } from "~/auth/session-provider";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const useSubmitMutation = () =>
-  useMutation({
-    onSuccess: () => {
+const useSubmitMutation = () => {
+  const router = useRouter();
+  const navigation = useCacheBustedNavigation();
+
+  return useMutation({
+    onSuccess: (user) => {
       notifications.show({
         title: "Success",
         message: "User updated successfully",
         color: "green",
       });
+      navigation.replace(`/users/${user.id}`);
     },
     mutationKey: ["submitUserForm"],
     mutationFn: async ({
@@ -39,8 +46,6 @@ const useSubmitMutation = () =>
       const compressedFile = !!file
         ? await compressUserPictureFile(file)
         : null;
-
-      console.log("(user-profile-form): ", { compressedFile });
 
       const fileToUpload = compressedFile
         ? new File([compressedFile], `user-picture-${userId}.webp`, {
@@ -58,15 +63,20 @@ const useSubmitMutation = () =>
       if (uploadResult?.[0])
         await waitUntilPictureWithKeyExistsInDb(uploadResult[0].key);
 
-      await directApi.user.update.mutate({
+      router.prefetch(`/users/${userId}`);
+
+      return directApi.user.update.mutate({
         userId,
         data: {
           ...data,
-          pictureKey: uploadResult?.[0]?.key,
+          ...(uploadResult?.[0] && {
+            pictureKey: uploadResult[0].key,
+          }),
         },
       });
     },
   });
+};
 
 const useSignOutMutation = () => {
   const navigation = useCacheBustedNavigation();
@@ -105,7 +115,7 @@ const useImageUpload = (currentPictureUrl: string | undefined) => {
 
 const resolver = zodResolver(userUpdateFormSchema);
 
-const useUserProfileForm = (user: InwardFacingUserDTO) =>
+const useUserProfileForm = (user: InwardFacingUserDTO | OutwardFacingUserDTO) =>
   useForm<z.infer<typeof userUpdateFormSchema>>({
     validate: resolver,
     initialValues: {
@@ -113,9 +123,18 @@ const useUserProfileForm = (user: InwardFacingUserDTO) =>
     },
   });
 
-export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
+type UserProfileFormProps = {
+  user: InwardFacingUserDTO | OutwardFacingUserDTO;
+  readOnly?: boolean;
+};
+
+export const UserProfileForm: FC<UserProfileFormProps> = ({
   user,
+  readOnly = false,
 }) => {
+  const authSession = useSessionContext();
+  const viewerIsOwner = authSession?.user?.userId === user.id;
+
   const form = useUserProfileForm(user);
 
   const { handleFileUpload, pictureUrl, uploadedFile } = useImageUpload(
@@ -157,35 +176,68 @@ export const UserProfileForm: FC<{ user: InwardFacingUserDTO }> = ({
         <UserPictureInput
           pictureUrl={pictureUrl}
           onFileUpload={handleFileUpload}
+          disabled={readOnly}
         />
       </div>
-      <TextInput {...form.getInputProps("username")} label="Username" />
-      <div className="w-full">
-        <Button
-          type="submit"
-          loading={submitMutation.isLoading}
-          className="mb-2 w-full"
-        >
-          Save
-        </Button>
+      <TextInput
+        {...form.getInputProps("username")}
+        readOnly={readOnly}
+        label="Username"
+        variant={readOnly ? "filled" : "default"}
+      />
+      <div className="flex w-full flex-col gap-2">
+        {!readOnly && (
+          <Button
+            type="submit"
+            loading={submitMutation.isLoading}
+            className="mb-4 w-full"
+          >
+            Save
+          </Button>
+        )}
         <div className="flex w-full gap-2 [&>*]:w-full">
-          <Button
-            variant="outline"
-            color="red"
-            onClick={handleDelete}
-            loading={deleteUserMutation.isLoading}
-          >
-            Delete Account
-          </Button>
-          <Button
-            onClick={() => signOutMutation.mutate(user.id)}
-            loading={signOutMutation.isLoading}
-            variant="outline"
-            color="gray"
-          >
-            Sign Out
-          </Button>
+          {!readOnly && (
+            <Button
+              variant="outline"
+              color="red"
+              onClick={handleDelete}
+              loading={deleteUserMutation.isLoading}
+            >
+              Delete Account
+            </Button>
+          )}
+          {viewerIsOwner && readOnly && (
+            <Button
+              variant="outline"
+              component={Link}
+              href={`/users/${user.id}/edit`}
+            >
+              Edit
+            </Button>
+          )}
+          {viewerIsOwner && (
+            <Button
+              onClick={() => signOutMutation.mutate(user.id)}
+              loading={signOutMutation.isLoading}
+              variant="outline"
+              color="gray"
+            >
+              Sign Out
+            </Button>
+          )}
         </div>
+        {!readOnly && (
+          <Button
+            component={Link}
+            href={`/users/${user.id}`}
+            className="w-full"
+            variant="subtle"
+            color="gray"
+            size="xs"
+          >
+            Cancel
+          </Button>
+        )}
       </div>
     </form>
   );

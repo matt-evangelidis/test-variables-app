@@ -6,11 +6,13 @@ import { UserBadge } from "~/app/_components/user-badge";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
 import { getServerAuthSession } from "~/auth/lucia";
 import { TimeStamp } from "~/components/time-stamp";
-import { api } from "~/trpc/server";
+import { createServerApi } from "~/trpc/server";
 
 const PostPage: NextServerPage = async ({ params }) => {
+  const api = await createServerApi();
   const { postId } = individualPostPageParamsSchema.parse(params);
-  const post = await api.post.getById.query(postId);
+
+  const post = await api.post.getById(postId);
   const authSession = await getServerAuthSession();
 
   const viewerIsAuthor = authSession?.user?.userId === post.authorUserId;

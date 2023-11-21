@@ -7,7 +7,8 @@ import {
   type PaperProps,
   Text,
 } from "@mantine/core";
-import { api } from "~/trpc/server";
+import Link from "next/link";
+import { createServerApi } from "~/trpc/server";
 
 const sizePadding: Record<MantineSize, string | number> = {
   xs: 6,
@@ -28,10 +29,14 @@ export const UserBadge: NextServerComponent<UserBadgeProps> = async ({
   className,
   ...props
 }) => {
-  const data = await api.user.getUserAuthorDisplayInfo.query(userId);
+  const api = await createServerApi();
+  const data = await api.user.getUserAuthorDisplayInfo(userId);
   return (
     <Paper
-      className={cx("flex items-center gap-2", className)}
+      className={cx(
+        "link-overlay-container group flex items-center gap-2",
+        className,
+      )}
       radius="md"
       p={sizePadding[size]}
       {...props}
@@ -42,7 +47,14 @@ export const UserBadge: NextServerComponent<UserBadgeProps> = async ({
         src={data.pictureUrl}
         alt={`${data.username} picture`}
       />
-      <Text size={size}>{data.username}</Text>
+      <Text
+        component={Link}
+        href={`/users/${userId}`}
+        className="link-overlay-anchor group-hover:underline"
+        size={size}
+      >
+        {data.username}
+      </Text>
     </Paper>
   );
 };

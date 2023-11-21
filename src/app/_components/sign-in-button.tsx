@@ -20,7 +20,7 @@ export const SignInButton: FC<ButtonProps> = (props) => {
   return (
     <Button
       {...props}
-      onClick={() => navigation.push(`/users/${session.user.userId}/edit`)}
+      onClick={() => navigation.push(`/users/${session.user.userId}`)}
     >
       Profile
     </Button>

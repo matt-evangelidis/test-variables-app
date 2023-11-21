@@ -2,11 +2,13 @@ import type { NextServerPage } from "$react-types";
 import { PostForm } from "~/app/posts/_components/post-form";
 import { individualPostPageParamsSchema } from "~/app/posts/pageParamsSchema";
 import AuthenticatedRoute from "~/components/authenticated-route";
-import { api } from "~/trpc/server";
+import { createServerApi } from "~/trpc/server";
 
 const EditPostPage: NextServerPage = async ({ params }) => {
+  const api = await createServerApi();
   const { postId } = individualPostPageParamsSchema.parse(params);
-  const fullPost = await api.post.getById.query(postId);
+
+  const fullPost = await api.post.getById(postId);
 
   return (
     <AuthenticatedRoute userMustHaveId={fullPost.authorUserId}>

@@ -3,12 +3,13 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { PostCard } from "~/app/posts/_components/post-card";
 import { PostListPaginationControls } from "~/app/posts/_components/post-list-pagination-controls";
-import { api } from "~/trpc/server";
+import { createServerApi } from "~/trpc/server";
 
 const PostListPagination: NextServerPage<
   WithClassName & { currentPage: number }
 > = async ({ currentPage, className }) => {
-  const totalPostPages = await api.post.getTotalPages.query();
+  const api = await createServerApi();
+  const totalPostPages = await api.post.getTotalPages();
 
   return (
     <PostListPaginationControls
@@ -29,9 +30,10 @@ const paginationParamsSchema = z.object({
 const PostListPage: NextServerPage = async ({
   searchParams: untypedSearchParams,
 }) => {
+  const api = await createServerApi();
   const searchParams = paginationParamsSchema.parse(untypedSearchParams);
 
-  const postList = await api.post.getNewestPaginated.query({
+  const postList = await api.post.getNewestPaginated({
     page: searchParams.page,
   });
 

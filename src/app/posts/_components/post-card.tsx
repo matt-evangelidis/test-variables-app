@@ -4,15 +4,14 @@ import { Divider, Text } from "@mantine/core";
 import type { Post } from "@prisma/client";
 import Link from "next/link";
 import { TimeStamp } from "~/components/time-stamp";
-import { api } from "~/trpc/server";
+import { createServerApi } from "~/trpc/server";
 
 export const PostCard: NextServerPage<WithClassName & { post: Post }> = async ({
   className,
   post,
 }) => {
-  const author = await api.user.getUserAuthorDisplayInfo.query(
-    post.authorUserId,
-  );
+  const api = await createServerApi();
+  const author = await api.user.getUserAuthorDisplayInfo(post.authorUserId);
   return (
     <div
       className={cx(
