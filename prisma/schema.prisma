@@ -2,91 +2,112 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 generator zod {
-    provider      = "zod-prisma"
-    modelCase     = "camelCase"
-    modelSuffix   = "Schema"
-    relationModel = false
+  provider      = "zod-prisma"
+  modelCase     = "camelCase"
+  modelSuffix   = "Schema"
+  relationModel = false
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_PRISMA_URL")
-    directUrl = env("DATABASE_URL_NON_POOLING")
+  provider  = "postgresql"
+  url       = env("DATABASE_PRISMA_URL")
+  directUrl = env("DATABASE_URL_NON_POOLING")
 }
 
 model Post {
-    id String @id @default(uuid())
+  id String @id @default(uuid())
 
-    title   String /// @zod.min(1).max(64)
-    content String /// @zod.min(1).max(1024)
+  title   String /// @zod.min(1).max(64)
+  content String /// @zod.min(1).max(1024)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    authorUserId String
-    autor        User   @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  authorUserId String
+  autor        User   @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
 
-    @@index([title])
-    @@index([content])
+  @@index([title])
+  @@index([content])
 }
 
 // Auth
 
 model User {
-    id String @id @unique @default(uuid())
+  id String @id @unique @default(uuid())
 
-    email          String  @unique /// @zod.email()
-    email_verified Boolean @default(false)
+  email          String  @unique /// @zod.email()
+  email_verified Boolean @default(false)
 
-    username String /// @zod.min(3).max(24)
+  username String /// @zod.min(3).max(24)
 
-    pictureKey String?
-    picture    UploadedImage? @relation(fields: [pictureKey], references: [key])
+  pictureKey String?
+  picture    UploadedImage? @relation(fields: [pictureKey], references: [key])
 
-    auth_session              Session[]
-    key                       Key[]
-    posts                     Post[]
-    email_verification_claims EmailVerificationClaim[]
+  auth_session              Session[]
+  key                       Key[]
+  posts                     Post[]
+  email_verification_claims EmailVerificationClaim[]
 }
 
 model Session {
-    id             String @id @unique
-    user_id        String
-    active_expires BigInt
-    idle_expires   BigInt
-    user           User   @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  id             String @id @unique
+  user_id        String
+  active_expires BigInt
+  idle_expires   BigInt
+  user           User   @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
-    @@index([user_id])
+  @@index([user_id])
 }
 
 model Key {
-    id              String  @id @unique
-    hashed_password String?
-    user_id         String
-    user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  id              String  @id @unique
+  hashed_password String?
+  user_id         String
+  user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
-    @@index([user_id])
+  @@index([user_id])
 }
 
 model UploadedImage {
-    key           String  @id @unique
-    url           String /// @zod.url()
-    size          Int
-    isUserPicture Boolean @default(false)
+  key           String  @id @unique
+  url           String /// @zod.url()
+  size          Int
+  isUserPicture Boolean @default(false)
 
-    beingUsedByUsers User[]
+  beingUsedByUsers User[]
 }
 
 // A "claim" represents a user entering their email into the system
 // and an email being sent out that allows the user to verify that they
 // own the email address they entered.
 model EmailVerificationClaim {
-    token   String   @id @unique
-    expires DateTime
-    user_id String
-    user    User     @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  token   String   @id @unique
+  expires DateTime
+  user_id String
+  user    User     @relation(references: [id], fields: [user_id], onDelete: Cascade)
+}
+
+model Variable {
+  id           String          @id @default(uuid())
+  name         String          @unique
+  formula      String?
+  value        Float
+  static       Boolean
+  dependencies String[]
+  config       VariableConfig?
+
+  @@index([static])
+}
+
+model VariableConfig {
+  id          String   @id @unique @default(uuid())
+  variable_id String   @unique
+  variable    Variable @relation(references: [id], fields: [variable_id], onDelete: Cascade)
+  current     Int?
+  max         Int?
+  min         Int?
 }

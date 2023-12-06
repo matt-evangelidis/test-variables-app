@@ -20,6 +20,10 @@ const navbarItems: NavbarItem[] = [
     label: "Posts",
     href: "/posts",
   },
+  {
+    label: "Variables",
+    href: "/variables",
+  },
 ];
 
 export const Navbar: NextServerPage<WithClassName> = async ({ className }) => {
