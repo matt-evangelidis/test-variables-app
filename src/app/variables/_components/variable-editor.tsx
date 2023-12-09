@@ -1,11 +1,6 @@
 "use client";
-import {
-  Link,
-  RichTextEditor,
-  useRichTextEditorContext,
-} from "@mantine/tiptap";
-import { type Editor, FloatingMenu, useEditor } from "@tiptap/react";
-import { StarterKit } from "@tiptap/starter-kit";
+import { RichTextEditor, useRichTextEditorContext } from "@mantine/tiptap";
+import { type Editor, FloatingMenu } from "@tiptap/react";
 import React, { type FC } from "react";
 import { type Variable } from "@prisma/client";
 import { Button } from "@mantine/core";
@@ -31,8 +26,6 @@ type Props = {
   editor: Editor | null;
 };
 export const VariableEditor: FC<Props> = ({ editor, variables }) => {
-  console.log(editor?.getText());
-
   return (
     <RichTextEditor editor={editor}>
       {editor && (

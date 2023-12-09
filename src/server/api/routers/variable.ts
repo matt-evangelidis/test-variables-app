@@ -2,6 +2,7 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 import { createVariableInputSchema } from "~/schemas";
 import { variableSchema } from "$prisma-schemas/variable";
+import { resolveVariableFormulas } from "~/services/variable";
 // Modelling the DB model for variables
 // a variable either contains a standalone value (e.g. my character's strength score is 18)
 // or it contains a value that is resolved through a formula/expression
@@ -20,11 +21,11 @@ import { variableSchema } from "$prisma-schemas/variable";
 
 export const variableRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    // TODO: run the findMany first, then resolve formulas?
     const variables = await ctx.db.variable.findMany({
       include: { config: true },
     });
-    return variables;
+    console.log(variables);
+    return resolveVariableFormulas(variables);
   }),
   getStatic: publicProcedure.query(async ({ ctx }) => {
     const staticVariables = await ctx.db.variable.findMany({
