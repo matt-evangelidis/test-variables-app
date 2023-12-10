@@ -1,6 +1,7 @@
 import { postSchema } from "$prisma-schemas/post";
 import { userSchema } from "$prisma-schemas/user";
 import { variableSchema } from "$prisma-schemas/variable";
+import { z } from "zod";
 
 export const userSignUpFormSchema = userSchema.pick({
   email: true,
@@ -23,8 +24,13 @@ export const createPostInputSchema = postSchema.pick({
 
 export const createVariableInputSchema = variableSchema.pick({
   name: true,
-  value: true,
+  expression: true,
   static: true,
-  formula: true,
   dependencies: true,
 });
+
+export const displayVariableSchema = variableSchema.extend({
+  display: z.string(),
+});
+
+export const displayVariableArraySchema = displayVariableSchema.array();

@@ -1,6 +1,10 @@
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { z } from "zod";
-import { createVariableInputSchema } from "~/schemas";
+import {
+  createVariableInputSchema,
+  displayVariableArraySchema,
+  displayVariableSchema,
+} from "~/schemas";
 import { variableSchema } from "$prisma-schemas/variable";
 import { resolveVariableFormulas } from "~/services/variable";
 // Modelling the DB model for variables
@@ -20,13 +24,15 @@ import { resolveVariableFormulas } from "~/services/variable";
 // this seems best supported as an additional table, not sure the best way of going about adding for trpc/prisma
 
 export const variableRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const variables = await ctx.db.variable.findMany({
-      include: { config: true },
-    });
-    console.log(variables);
-    return resolveVariableFormulas(variables);
-  }),
+  getAll: publicProcedure
+    .output(displayVariableArraySchema)
+    .query(async ({ ctx }) => {
+      const variables = await ctx.db.variable.findMany({
+        include: { config: true },
+      });
+      console.log(variables);
+      return resolveVariableFormulas(variables);
+    }),
   getStatic: publicProcedure.query(async ({ ctx }) => {
     const staticVariables = await ctx.db.variable.findMany({
       where: { static: true },

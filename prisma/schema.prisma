@@ -91,11 +91,29 @@ model EmailVerificationClaim {
   user    User     @relation(references: [id], fields: [user_id], onDelete: Cascade)
 }
 
+// Value vs. formula
+// a value is strictly meant to represent a single value, whereas a formula can represent a value for resolution, including values
+// a simpler model would be formulas only, which would contain values as a subset
+// with the way formulas have to be resolved during a GET, there's always the overhead of mapping
+// as such, simplifying this model to only formulas (maybe renamed to expressions) is likely a good step
+
+// additional argument is how to then handle config, such as min/max/current values (for components like sliders to represent HP)
+// a config should have simple static values stored, but if these are based off a dynamic value calculated at runtime,
+// how do we handle them falling out of sync?
+
+// a safe assumption here might be to make some sensible defaults
+// for our imagine use case, we'd always want a hp slider's max to be equal to the current total hp, and its min at 0
+// we only care about storing the current value
+// modifying the base variable to be larger doesn't matter
+// and we'd only have to reduce the current in the case the new total is smaller than the current value
+
+// in summary: replace formula and value with expression
+// remove max and min from VariableConfig for the time being
+
 model Variable {
   id           String          @id @default(uuid())
   name         String          @unique
-  formula      String?
-  value        Float
+  expression String
   static       Boolean
   dependencies String[]
   config       VariableConfig?
@@ -108,6 +126,4 @@ model VariableConfig {
   variable_id String   @unique
   variable    Variable @relation(references: [id], fields: [variable_id], onDelete: Cascade)
   current     Int?
-  max         Int?
-  min         Int?
 }

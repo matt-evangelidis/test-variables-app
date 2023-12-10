@@ -17,7 +17,7 @@ const VariablesPage = async () => {
         <Space className="mb-8" />
         {variables.map((variable, index) => (
           <Text key={`${index}-${variable.id}`}>
-            {variable.name}: {variable.formula}
+            {variable.name}: {variable.display}
           </Text>
         ))}
       </div>

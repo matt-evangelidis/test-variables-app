@@ -7,13 +7,12 @@ const compileEvalFn = (expr: string): { evaluate: EvalFn } => {
 };
 
 const shouldBeResolved = (variable: Variable): boolean =>
-  (variable.formula !== undefined || variable.formula !== "") &&
-  variable.dependencies.length > 0;
+  variable.expression !== "" && variable.dependencies.length > 0;
 
-const sanitizeFormula = (formula: string | undefined | null) =>
-  formula?.replaceAll(/[{}]/g, "") ?? "";
+const sanitizeExpression = (expression: string) =>
+  expression.replaceAll(/[{}]/g, "");
 
-const resolveFormula = (
+const resolveExpression = (
   variable: Variable | undefined,
   variablesMap: Record<string, Variable>,
 ): number => {
@@ -22,20 +21,25 @@ const resolveFormula = (
   }
 
   if (shouldBeResolved(variable)) {
-    const { evaluate } = compileEvalFn(sanitizeFormula(variable.formula));
-    const subFormulas: Record<string, number> = {};
+    const { evaluate } = compileEvalFn(sanitizeExpression(variable.expression));
+    const subExpressions: Record<string, number> = {};
     for (const id of variable.dependencies) {
       const lookup = variablesMap[id]!;
-      subFormulas[lookup.name] = resolveFormula(variablesMap[id], variablesMap);
-      console.log({ subFormulas });
+      subExpressions[lookup.name] = resolveExpression(
+        variablesMap[id],
+        variablesMap,
+      );
+      console.log({ subExpressions });
     }
-    return evaluate(subFormulas);
+    return evaluate(subExpressions);
   }
 
-  return Number(variable.value);
+  return Number(variable.expression);
 };
 
-export const resolveVariableFormulas = (variables: Variable[]): Variable[] => {
+export const resolveVariableFormulas = (
+  variables: Variable[],
+): Array<Variable & { display: string }> => {
   // doing this in two loops is probably pretty inefficient, but it does avoid the cost of setting up many, many smaller iterations
   // by mapping out all the variables in a structure for convenient lookup and resolution
   const variablesMap: Record<string, Variable> = {};
@@ -44,13 +48,11 @@ export const resolveVariableFormulas = (variables: Variable[]): Variable[] => {
   }
   console.log(variablesMap);
 
-  for (const variable of variables) {
-    // TODO: clean all the if checks up to make it easier to determine on the frontend if a variable should be displaying a formula or a value
-    // maybe introduce a frontend version of Variable with a 'displayValue' field
-    variable.formula = resolveFormula(
-      variablesMap[variable.id],
-      variablesMap,
-    ).toString();
-  }
-  return variables;
+  // for (const variable of variables) {
+  //   addValueKey(variable, resolveExpression(variable, variablesMap).toString());
+  // }
+  return variables.map((variable) => ({
+    ...variable,
+    display: resolveExpression(variable, variablesMap).toString(),
+  }));
 };

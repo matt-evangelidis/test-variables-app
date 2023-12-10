@@ -33,9 +33,8 @@ const useCreateVariableForm = () =>
     validate: formResolver,
     initialValues: {
       name: "",
-      value: 0,
       static: false,
-      formula: "",
+      expression: "",
       dependencies: [],
     },
   });
@@ -61,7 +60,7 @@ export const VariableForm: FC<Props> = ({ status, variables }) => {
   const createVariable = api.variable.create.useMutation({});
   const mutate = (data: z.infer<typeof createVariableInputSchema>) => {
     data.dependencies = resolveDependencies(editor?.getText(), variables);
-    data.formula = editor?.getText();
+    data.expression = editor?.getText() ?? "";
     console.log(data);
     createVariable.mutate(data);
   };
@@ -74,7 +73,7 @@ export const VariableForm: FC<Props> = ({ status, variables }) => {
         <TextInput {...form.getInputProps("name")} label="Name" />
         <Switch {...form.getInputProps("static")} label="Static" />
         {isStatic ? (
-          <NumberInput {...form.getInputProps("value")} label="Value" />
+          <NumberInput {...form.getInputProps("expression")} label="Value" />
         ) : (
           <VariableEditor editor={editor} variables={variables} />
         )}
