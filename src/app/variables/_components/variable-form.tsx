@@ -10,6 +10,7 @@ import { Button, NumberInput, Switch, TextInput } from "@mantine/core";
 import { VariableEditor } from "~/app/variables/_components/variable-editor";
 import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
+import { useCacheBustedNavigation } from "$next-helpers";
 
 type VariableFormStatus =
   | { mode: "create" }
@@ -53,11 +54,20 @@ const resolveDependencies = (
 
 export const VariableForm: FC<Props> = ({ status, variables }) => {
   const form = useCreateVariableForm();
+  const nav = useCacheBustedNavigation();
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
   });
-  const createVariable = api.variable.create.useMutation({});
+
+  const refresh = () => {
+    nav.replace(`/variables`);
+  };
+
+  const createVariable = api.variable.create.useMutation({
+    onSuccess: refresh,
+  });
+
   const mutate = (data: z.infer<typeof createVariableInputSchema>) => {
     data.dependencies = resolveDependencies(editor?.getText(), variables);
     data.expression = editor?.getText() ?? "";
@@ -77,7 +87,11 @@ export const VariableForm: FC<Props> = ({ status, variables }) => {
         ) : (
           <VariableEditor editor={editor} variables={variables} />
         )}
-        <Button type="submit" variant="filled">
+        <Button
+          type="submit"
+          variant="filled"
+          loading={createVariable.isLoading || !!nav.loading?.url}
+        >
           Submit
         </Button>
       </form>

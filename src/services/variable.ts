@@ -48,9 +48,11 @@ export const resolveVariableFormulas = (
   }
   console.log(variablesMap);
 
-  // for (const variable of variables) {
-  //   addValueKey(variable, resolveExpression(variable, variablesMap).toString());
-  // }
+  // TODO: how do we handle a missing dependency?
+  // probably need to display some error message and then point or link the user to change the variable with the missing dependency
+  // E.g. if I delete a strengthScore, my strengthModifier suddenly breaks because it has no variable to apply against
+  // this will likely expand the FE-version of a Variable (or perhaps a VariablePayload type) to include errors and ways to link the user to
+  // a location to fix the issue
   return variables.map((variable) => ({
     ...variable,
     display: resolveExpression(variable, variablesMap).toString(),
