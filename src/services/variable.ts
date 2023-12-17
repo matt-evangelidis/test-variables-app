@@ -37,6 +37,9 @@ const resolveExpression = (
   return Number(variable.expression);
 };
 
+export type ResolvedVariable = ReturnType<
+  typeof resolveVariableFormulas
+>[number];
 export const resolveVariableFormulas = (
   variables: Variable[],
 ): Array<Variable & { display: string }> => {

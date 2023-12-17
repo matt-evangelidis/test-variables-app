@@ -43,7 +43,7 @@ const useCreateVariableForm = () =>
 const resolveDependencies = (
   formula: string | undefined,
   variables: Variable[],
-) => {
+): string[] => {
   if (!formula) {
     return [];
   }
@@ -58,9 +58,15 @@ export const VariableForm: FC<Props> = ({ status, variables }) => {
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
+    editorProps: {
+      // prevent new lines in the editor
+      handleKeyDown: (_, event) => event.key === "Enter",
+    },
   });
 
   const refresh = () => {
+    form.reset();
+    editor?.commands.clearContent();
     nav.replace(`/variables`);
   };
 

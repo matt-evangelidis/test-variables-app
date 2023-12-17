@@ -1,7 +1,6 @@
 import { createServerApi } from "~/trpc/server";
 import { Suspense } from "react";
-import { VariableForm } from "~/app/variables/_components/variable-form";
-import { Space, Text } from "@mantine/core";
+import { VariableDrawer } from "~/app/variables/_components/variable-drawer";
 
 const VariablesPage = async () => {
   const api = await createServerApi();
@@ -12,14 +11,8 @@ const VariablesPage = async () => {
       <h2 className="mb-8">Variables</h2>
       <div className="mb-8 flex w-full flex-col gap-2">
         <Suspense>
-          <VariableForm status={{ mode: "create" }} variables={variables} />
+          <VariableDrawer variables={variables} />
         </Suspense>
-        <Space className="mb-8" />
-        {variables.map((variable, index) => (
-          <Text key={`${index}-${variable.id}`}>
-            {variable.name}: {variable.display}
-          </Text>
-        ))}
       </div>
     </>
   );
