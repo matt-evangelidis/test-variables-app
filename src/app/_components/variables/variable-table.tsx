@@ -13,6 +13,7 @@ import { IconEdit, IconX } from "@tabler/icons-react";
 import { api } from "~/trpc/react";
 import { useCacheBustedNavigation } from "$next-helpers";
 import { useDisclosure } from "@mantine/hooks";
+import { DependenciesWarning } from "~/app/_components/variables/variable-table/dependencies-warning";
 
 interface Props {
   variables: ResolvedVariable[];
@@ -86,6 +87,10 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
           title="Delete Variable?"
         >
           <Text>Are you sure you want to delete this variable?</Text>
+          <DependenciesWarning
+            toDelete={selectedVariable}
+            variables={variables}
+          />
           <Group justify={"center"}>
             <Button
               onClick={() => deleteMutation(selectedVariable.id)}

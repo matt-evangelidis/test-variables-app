@@ -29,6 +29,7 @@ export const variableRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const variables = await ctx.db.variable.findMany({
         include: { config: true },
+        orderBy: { name: "asc" },
       });
       console.log(variables);
       return resolveVariableFormulas(variables);
