@@ -1,21 +1,11 @@
 import { type ResolvedVariable } from "~/services/variable";
 import { type FC, useState } from "react";
-import {
-  ActionIcon,
-  Button,
-  Code,
-  Group,
-  Modal,
-  Space,
-  Stack,
-  Table,
-  Text,
-} from "@mantine/core";
+import { ActionIcon, Group, Stack, Table } from "@mantine/core";
 import { IconEdit, IconX } from "@tabler/icons-react";
 import { api } from "~/trpc/react";
 import { useCacheBustedNavigation } from "$next-helpers";
 import { useDisclosure } from "@mantine/hooks";
-import { DependenciesWarning } from "~/app/_components/variables/variable-table/dependencies-warning";
+import { DeleteVariableModal } from "~/app/_components/variables/variable-table/delete-variable-modal";
 
 interface Props {
   variables: ResolvedVariable[];
@@ -23,7 +13,6 @@ interface Props {
 }
 
 export const VariableTable: FC<Props> = ({ variables, refetch }) => {
-  // TODO: open a modal here to warn about deleting, highlighting any potential variable breakage
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedVariable, setSelectedVariable] =
     useState<ResolvedVariable | null>(null);
@@ -82,31 +71,14 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
   return (
     <>
       {selectedVariable && (
-        <Modal
+        <DeleteVariableModal
           opened={opened}
-          centered
           onClose={close}
-          title="Delete Variable?"
-        >
-          <Space h="sm" />
-          <Text>
-            Are you sure you want to delete <Code>{selectedVariable.name}</Code>
-            ?
-          </Text>
-          <Space h="sm" />
-          <DependenciesWarning
-            toDelete={selectedVariable}
-            variables={variables}
-          />
-          <Group justify={"center"}>
-            <Button
-              onClick={() => deleteMutation(selectedVariable.id)}
-              loading={isLoading || !!nav.loading?.url}
-            >
-              Delete {selectedVariable.name}
-            </Button>
-          </Group>
-        </Modal>
+          loading={isLoading || !!nav.loading?.url}
+          toDelete={selectedVariable}
+          variables={variables}
+          deleteFn={deleteMutation}
+        />
       )}
       <Table highlightOnHover withRowBorders>
         <Table.Thead>
