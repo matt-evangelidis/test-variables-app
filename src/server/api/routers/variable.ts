@@ -55,4 +55,7 @@ export const variableRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return ctx.db.variable.create({ data: { ...input } });
     }),
+  delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+    return ctx.db.variable.delete({ where: { id: input } });
+  }),
 });

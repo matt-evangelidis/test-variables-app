@@ -1,10 +1,11 @@
 import { cx } from "$cx";
 import type { NextServerPage, WithClassName } from "$react-types";
-import { Anchor, Button } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { Anchor } from "@mantine/core";
 import Link from "next/link";
 import { SignInButton } from "~/app/_components/sign-in-button";
-import { getServerAuthSession } from "~/auth/lucia";
+import { createServerApi } from "~/trpc/server";
+import { Suspense } from "react";
+import { VariableDrawer } from "~/app/_components/variables/variable-drawer";
 
 type NavbarItem = {
   label: string;
@@ -20,14 +21,12 @@ const navbarItems: NavbarItem[] = [
     label: "Posts",
     href: "/posts",
   },
-  {
-    label: "Variables",
-    href: "/variables",
-  },
 ];
 
 export const Navbar: NextServerPage<WithClassName> = async ({ className }) => {
-  const authSession = await getServerAuthSession();
+  // const authSession = await getServerAuthSession();
+  const api = await createServerApi();
+  const variables = await api.variable.getAll();
   return (
     <nav
       className={cx(
@@ -36,11 +35,14 @@ export const Navbar: NextServerPage<WithClassName> = async ({ className }) => {
       )}
     >
       <div className="w-20">
-        {authSession && (
-          <Button component={Link} href="/posts/new" leftSection={<IconPlus />}>
-            Post
-          </Button>
-        )}
+        <Suspense>
+          <VariableDrawer initialVariables={variables} />
+        </Suspense>
+        {/*{authSession && (*/}
+        {/*  <Button component={Link} href="/posts/new" leftSection={<IconPlus />}>*/}
+        {/*    Post*/}
+        {/*  </Button>*/}
+        {/*)}*/}
       </div>
       <div className="flex gap-4">
         {navbarItems.map((item) => (

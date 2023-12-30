@@ -7,7 +7,7 @@ import { createVariableInputSchema } from "~/schemas";
 import { type z } from "zod";
 import { api } from "~/trpc/react";
 import { Button, NumberInput, Switch, TextInput } from "@mantine/core";
-import { VariableEditor } from "~/app/variables/_components/variable-editor";
+import { VariableEditor } from "~/app/_components/variables/variable-editor";
 import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { useCacheBustedNavigation } from "$next-helpers";
@@ -24,6 +24,7 @@ type VariableFormStatus =
 type Props = {
   status: VariableFormStatus;
   variables: Variable[];
+  refetch: () => void;
 };
 
 const formResolver = zodResolver(createVariableInputSchema);
@@ -52,7 +53,7 @@ const resolveDependencies = (
     .map((variable) => variable.id);
 };
 
-export const VariableForm: FC<Props> = ({ status, variables }) => {
+export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
   const form = useCreateVariableForm();
   const nav = useCacheBustedNavigation();
   const editor = useEditor({
@@ -64,14 +65,14 @@ export const VariableForm: FC<Props> = ({ status, variables }) => {
     },
   });
 
-  const refresh = () => {
-    form.reset();
-    editor?.commands.clearContent();
-    nav.replace(`/variables`);
-  };
-
   const createVariable = api.variable.create.useMutation({
-    onSuccess: refresh,
+    onSuccess: (newVariable) => {
+      // TODO: success in creating a new variable should trigger a re-fetch of the complete list to resolve correctly
+      console.log({ newVariable });
+      refetch();
+      form.reset();
+      editor?.commands.clearContent();
+    },
   });
 
   const mutate = (data: z.infer<typeof createVariableInputSchema>) => {
