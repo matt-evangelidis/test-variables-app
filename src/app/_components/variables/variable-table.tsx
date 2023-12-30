@@ -3,8 +3,10 @@ import { type FC, useState } from "react";
 import {
   ActionIcon,
   Button,
+  Code,
   Group,
   Modal,
+  Space,
   Stack,
   Table,
   Text,
@@ -86,7 +88,12 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
           onClose={close}
           title="Delete Variable?"
         >
-          <Text>Are you sure you want to delete this variable?</Text>
+          <Space h="sm" />
+          <Text>
+            Are you sure you want to delete <Code>{selectedVariable.name}</Code>
+            ?
+          </Text>
+          <Space h="sm" />
           <DependenciesWarning
             toDelete={selectedVariable}
             variables={variables}

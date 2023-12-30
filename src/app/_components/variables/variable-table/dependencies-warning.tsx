@@ -18,18 +18,20 @@ export const DependenciesWarning: FC<Props> = ({ toDelete, variables }) => {
 
   return (
     <>
-      <Space h="sm" />
       <Text>
         Deleting <Code>{toDelete.name}</Code> will affect the following:
       </Text>
       <Table>
         <Table.Thead>
           <Table.Th>Variable</Table.Th>
+          <Table.Th>Value</Table.Th>
         </Table.Thead>
         <Table.Tbody>
           {dependencies.map((dependency) => (
             <Table.Tr key={`${dependency.id}-warning`}>
-              <Table.Td>{dependency.name}</Table.Td>
+              <Table.Td>
+                <Code>{dependency.name}</Code>
+              </Table.Td>
               <Table.Td>{dependency.display}</Table.Td>
             </Table.Tr>
           ))}
