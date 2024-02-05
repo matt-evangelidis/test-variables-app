@@ -1,11 +1,12 @@
 import { type ResolvedVariable } from "~/services/variable";
 import { type FC, useState } from "react";
-import { ActionIcon, Group, Stack, Table } from "@mantine/core";
+import { ActionIcon, Flex, Group, Stack, Table, Tooltip } from "@mantine/core";
 import { IconEdit, IconX } from "@tabler/icons-react";
 import { api } from "~/trpc/react";
 import { useCacheBustedNavigation } from "$next-helpers";
-import { useDisclosure } from "@mantine/hooks";
 import { DeleteVariableModal } from "~/app/_components/variables/variable-table/delete-variable-modal";
+import { useModalManager } from "~/app/_components/variables/variable-table/use-modal-manager";
+import { NullableTooltip } from "~/app/_components/nullable-tooltip";
 
 interface Props {
   variables: ResolvedVariable[];
@@ -13,12 +14,14 @@ interface Props {
 }
 
 export const VariableTable: FC<Props> = ({ variables, refetch }) => {
-  const [opened, { open, close }] = useDisclosure(false);
+  const deleteModal = useModalManager(false);
+  const editModal = useModalManager(false);
+
   const [selectedVariable, setSelectedVariable] =
     useState<ResolvedVariable | null>(null);
   const openModal = (variable: ResolvedVariable) => {
     setSelectedVariable(variable);
-    open();
+    deleteModal.open();
   };
 
   const nav = useCacheBustedNavigation();
@@ -27,7 +30,7 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
       //TODO: for setting loading on this component, probably look for the variable in state and then set loading in there
       // onMutate = () => {}
       onSuccess: () => {
-        close();
+        deleteModal.close();
         setSelectedVariable(null);
         refetch();
       },
@@ -37,7 +40,17 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
   const rows = variables.map((variable) => (
     <Table.Tr key={variable.id}>
       <Table.Td>{variable.name}</Table.Td>
-      <Table.Td>{variable.display}</Table.Td>
+      <Flex justify="center">
+        {/* Not a great solution to exposing underlying expressions, as it gives an inconsistent experience */}
+        {/* Probably best solved with an additional icon somewhere in the table that indicates the variable has an expression */}
+        <NullableTooltip
+          label={
+            variable.expression !== variable.display ? variable.expression : ""
+          }
+        >
+          <Table.Td>{variable.display}</Table.Td>
+        </NullableTooltip>
+      </Flex>
       <Table.Td>
         <Group gap={"xs"}>
           <Stack justify={"center"} align={"center"}>
@@ -72,8 +85,8 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
     <>
       {selectedVariable && (
         <DeleteVariableModal
-          opened={opened}
-          onClose={close}
+          opened={deleteModal.opened}
+          onClose={deleteModal.close}
           loading={isLoading || !!nav.loading?.url}
           toDelete={selectedVariable}
           variables={variables}
@@ -84,7 +97,9 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Variable</Table.Th>
-            <Table.Th>Value</Table.Th>
+            <Flex justify="center">
+              <Table.Th>Value</Table.Th>
+            </Flex>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>

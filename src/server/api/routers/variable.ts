@@ -49,7 +49,6 @@ export const variableRouter = createTRPCRouter({
       });
       return variable;
     }),
-
   create: publicProcedure
     .input(createVariableInputSchema)
     .output(variableSchema)
@@ -59,4 +58,12 @@ export const variableRouter = createTRPCRouter({
   delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.db.variable.delete({ where: { id: input } });
   }),
+  // update: publicProcedure
+  //   .input(/* TODO: add input schema here */)
+  //   .mutation(async ({ ctx, input }) => {
+  //     // how to handle renaming a variable?
+  //     // make it a special operation, grab the variables that depend on it and edit those strings?
+  //     // make the user aware expressions will need editing?
+  //     return ctx.db.variable.update();
+  //   }),
 });
