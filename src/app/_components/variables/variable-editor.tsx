@@ -24,8 +24,9 @@ const InsertVariable: FC<InsertVariableProps> = ({ variable }) => {
 type Props = {
   variables: Variable[];
   editor: Editor | null;
+  hasError: boolean;
 };
-export const VariableEditor: FC<Props> = ({ editor, variables }) => {
+export const VariableEditor: FC<Props> = ({ editor, variables, hasError }) => {
   const [showVariables, setShowVariables] = useState(false);
   return (
     <>
@@ -34,7 +35,10 @@ export const VariableEditor: FC<Props> = ({ editor, variables }) => {
         label={"Show variables"}
         onChange={(event) => setShowVariables(event.currentTarget.checked)}
       />
-      <RichTextEditor editor={editor}>
+      <RichTextEditor
+        editor={editor}
+        className={hasError ? "border-error" : ""}
+      >
         {editor && (
           <FloatingMenu
             editor={editor}

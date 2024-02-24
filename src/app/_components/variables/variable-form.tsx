@@ -6,7 +6,14 @@ import { useForm, zodResolver } from "@mantine/form";
 import { createVariableInputSchema } from "~/schemas";
 import { type z } from "zod";
 import { api } from "~/trpc/react";
-import { Button, NumberInput, Switch, TextInput } from "@mantine/core";
+import {
+  Button,
+  NumberInput,
+  Space,
+  Switch,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { VariableEditor } from "~/app/_components/variables/variable-editor";
 import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -32,7 +39,13 @@ const formResolver = zodResolver(createVariableInputSchema);
 const useCreateVariableForm = () =>
   useForm<z.infer<typeof createVariableInputSchema>>({
     // TODO: need more specific validation
-    validate: formResolver,
+    validate: {
+      expression: (value, values) =>
+        value.includes(`{${values.name}}`)
+          ? "expression cannot use its own name as a variable"
+          : null,
+      name: (value) => (value.length < 1 ? "Invalid name" : null),
+    },
     initialValues: {
       name: "",
       static: false,
@@ -83,6 +96,7 @@ export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
   };
 
   const isStatic = !!form.getInputProps("static").value;
+  const expressionError = form.errors?.expression;
 
   return (
     <>
@@ -92,7 +106,20 @@ export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
         {isStatic ? (
           <NumberInput {...form.getInputProps("expression")} label="Value" />
         ) : (
-          <VariableEditor editor={editor} variables={variables} />
+          <>
+            <VariableEditor
+              editor={editor}
+              variables={variables}
+              hasError={!!expressionError}
+            />
+            {expressionError ? (
+              <Text size="xs" className={"text-error"}>
+                {expressionError}
+              </Text>
+            ) : (
+              <Space h="sm" />
+            )}
+          </>
         )}
         <Button
           type="submit"

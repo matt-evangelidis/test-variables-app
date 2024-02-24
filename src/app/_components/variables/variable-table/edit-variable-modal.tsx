@@ -7,6 +7,22 @@ interface Props {
   loading: boolean;
 }
 
+// type BaseVariable = {
+//   id: string;
+//   name: string;
+// };
+//
+// type StaticVariable = BaseVariable & {
+//   value: number;
+//   static: true;
+// };
+//
+// type DynamicVariable = BaseVariable & {
+//   formula: string;
+//   dependencies: string[];
+//   static: false;
+// };
+
 // this is a good place to talk about the requirements of a variable by indicating what about a variable can change
 // a variable at rest (AKA not at runtime) has
 // name: mandatory, how a user can refer to a variable in a verbal and application-specific context
