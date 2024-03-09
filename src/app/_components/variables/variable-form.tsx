@@ -15,9 +15,9 @@ import {
   TextInput,
 } from "@mantine/core";
 import { VariableEditor } from "~/app/_components/variables/variable-editor";
-import { useEditor } from "@tiptap/react";
-import { StarterKit } from "@tiptap/starter-kit";
 import { useCacheBustedNavigation } from "$next-helpers";
+import { useVariableEditor } from "~/app/_components/variables/use-variable-editor";
+import { resolveDependencies } from "~/app/_components/variables/resolve-dependencies";
 
 type VariableFormStatus =
   | { mode: "create" }
@@ -54,18 +54,6 @@ const useCreateVariableForm = () =>
     },
   });
 
-const resolveDependencies = (
-  formula: string | undefined,
-  variables: Variable[],
-): string[] => {
-  if (!formula) {
-    return [];
-  }
-  return variables
-    .filter((variable) => formula.includes(`{${variable.name}}`))
-    .map((variable) => variable.id);
-};
-
 export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
   const form = useCreateVariableForm();
   const nav = useCacheBustedNavigation();
@@ -89,7 +77,7 @@ export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
   });
 
   const mutate = (data: z.infer<typeof createVariableInputSchema>) => {
-    data.dependencies = resolveDependencies(editor?.getText(), variables);
+    data.dependencies = resolveDependencies(editor?.getText() ?? "", variables);
     data.expression = editor?.getText() ?? "";
     console.log(data);
     createVariable.mutate(data);
