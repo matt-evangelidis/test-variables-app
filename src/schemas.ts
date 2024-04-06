@@ -29,6 +29,14 @@ export const createVariableInputSchema = variableSchema.pick({
   dependencies: true,
 });
 
+export const editVariableInputSchema = variableSchema.pick({
+  id: true,
+  name: true,
+  expression: true,
+  static: true,
+  dependencies: true,
+});
+
 export const displayVariableSchema = variableSchema.extend({
   display: z.string(),
 });

@@ -29,7 +29,6 @@ const resolveExpression = (
         variablesMap[id],
         variablesMap,
       );
-      console.log({ subExpressions });
     }
     return evaluate(subExpressions);
   }
@@ -49,7 +48,6 @@ export const resolveVariableFormulas = (
   for (const variable of variables) {
     variablesMap[variable.id] = variable;
   }
-  console.log(variablesMap);
 
   // TODO: how do we handle a missing dependency?
   // probably need to display some error message and then point or link the user to change the variable with the missing dependency

@@ -57,14 +57,7 @@ const useCreateVariableForm = () =>
 export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
   const form = useCreateVariableForm();
   const nav = useCacheBustedNavigation();
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "",
-    editorProps: {
-      // prevent new lines in the editor
-      handleKeyDown: (_, event) => event.key === "Enter",
-    },
-  });
+  const editor = useVariableEditor();
 
   const createVariable = api.variable.create.useMutation({
     onSuccess: (newVariable) => {

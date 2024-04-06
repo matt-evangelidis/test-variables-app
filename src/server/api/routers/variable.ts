@@ -3,10 +3,11 @@ import { z } from "zod";
 import {
   createVariableInputSchema,
   displayVariableArraySchema,
-  displayVariableSchema,
+  editVariableInputSchema,
 } from "~/schemas";
 import { variableSchema } from "$prisma-schemas/variable";
 import { resolveVariableFormulas } from "~/services/variable";
+import { type Variable } from "@prisma/client";
 // Modelling the DB model for variables
 // a variable either contains a standalone value (e.g. my character's strength score is 18)
 // or it contains a value that is resolved through a formula/expression
@@ -31,7 +32,7 @@ export const variableRouter = createTRPCRouter({
         include: { config: true },
         orderBy: { name: "asc" },
       });
-      console.log(variables);
+      // console.log(variables);
       return resolveVariableFormulas(variables);
     }),
   getStatic: publicProcedure.query(async ({ ctx }) => {
@@ -58,12 +59,81 @@ export const variableRouter = createTRPCRouter({
   delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.db.variable.delete({ where: { id: input } });
   }),
-  // update: publicProcedure
-  //   .input(/* TODO: add input schema here */)
-  //   .mutation(async ({ ctx, input }) => {
-  //     // how to handle renaming a variable?
-  //     // make it a special operation, grab the variables that depend on it and edit those strings?
-  //     // make the user aware expressions will need editing?
-  //     return ctx.db.variable.update();
-  //   }),
+  update: publicProcedure
+    .input(editVariableInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const existingVariable = await ctx.db.variable.findFirstOrThrow({
+        where: { id: input.id },
+      });
+      console.log({ existingVariable }, { input });
+
+      const updatePayload = isVariableUpdating(existingVariable, input);
+
+      if (!updatePayload) {
+        return;
+      }
+
+      // cases:
+      // 1. a variable with no dependencies has its value updated: no need to update other variables
+      // 2. a variable with no dependencies has its name updated: need to query other variables that contain its id, and update their expression to the new name
+      // 3. a variable has its formula updated: need to resolve if its dependencies (existing or not) have changed and update accordingly
+
+      if (existingVariable.dependencies.length < 1) {
+        return await ctx.db.variable.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            name: input.name,
+            static: input.static,
+            expression: input.expression,
+          },
+        });
+      }
+
+      const hasUpdatedName = existingVariable.name !== input.name;
+      if (hasUpdatedName) {
+        const dependentVariables = await ctx.db.variable.findMany({
+          where: { dependencies: { has: input.id } },
+        });
+        if (dependentVariables.length > 0) {
+          console.log("update dependent variables");
+          for (const dependency of dependentVariables) {
+            // assuming we want to support other wrapping sets, instances of using `{}` in formulas should be centralised to some other configurable function
+            const newExpression = dependency.expression.replaceAll(
+              `{${existingVariable.name}}`,
+              `{${input.name}}`,
+            );
+            console.log({ newExpression });
+            await ctx.db.variable.update({
+              where: { id: dependency.id },
+              data: { expression: newExpression },
+            });
+          }
+        }
+      }
+
+      console.log(input.dependencies);
+      return await ctx.db.variable.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          static: input.static,
+          expression: input.expression,
+          dependencies: input.dependencies,
+        },
+      });
+    }),
 });
+
+const isVariableUpdating = (
+  existingVariable: Variable,
+  updatedVariable: z.infer<typeof editVariableInputSchema>,
+) => {
+  const updatingName = existingVariable.name !== updatedVariable.name;
+  const updatingExpression =
+    existingVariable.expression !== updatedVariable.expression;
+  const updatingStatic = existingVariable.static !== updatedVariable.static;
+
+  return updatingName || updatingExpression || updatingStatic;
+};

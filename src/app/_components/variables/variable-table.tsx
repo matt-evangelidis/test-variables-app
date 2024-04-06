@@ -1,12 +1,13 @@
 import { type ResolvedVariable } from "~/services/variable";
 import { type FC, useState } from "react";
-import { ActionIcon, Flex, Group, Stack, Table, Tooltip } from "@mantine/core";
+import { ActionIcon, Flex, Group, Stack, Table } from "@mantine/core";
 import { IconEdit, IconX } from "@tabler/icons-react";
 import { api } from "~/trpc/react";
 import { useCacheBustedNavigation } from "$next-helpers";
 import { DeleteVariableModal } from "~/app/_components/variables/variable-table/delete-variable-modal";
 import { useModalManager } from "~/app/_components/variables/variable-table/use-modal-manager";
 import { NullableTooltip } from "~/app/_components/nullable-tooltip";
+import { EditVariableModal } from "~/app/_components/variables/variable-table/edit-variable-modal";
 
 interface Props {
   variables: ResolvedVariable[];
@@ -19,14 +20,27 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
 
   const [selectedVariable, setSelectedVariable] =
     useState<ResolvedVariable | null>(null);
-  const openModal = (variable: ResolvedVariable) => {
+
+  const openDeleteModal = (variable: ResolvedVariable) => {
     setSelectedVariable(variable);
     deleteModal.open();
   };
+  const closeDeleteModal = () => {
+    setSelectedVariable(null);
+    deleteModal.close();
+  };
+  const openEditModal = (variable: ResolvedVariable) => {
+    setSelectedVariable(variable);
+    editModal.open();
+  };
+  const closeEditModal = () => {
+    setSelectedVariable(null);
+    editModal.close();
+  };
 
   const nav = useCacheBustedNavigation();
-  const { isLoading, mutate: deleteMutation } = api.variable.delete.useMutation(
-    {
+  const { isLoading: isDeleteLoading, mutate: deleteMutation } =
+    api.variable.delete.useMutation({
       //TODO: for setting loading on this component, probably look for the variable in state and then set loading in there
       // onMutate = () => {}
       onSuccess: () => {
@@ -34,8 +48,15 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
         setSelectedVariable(null);
         refetch();
       },
-    },
-  );
+    });
+  const { isLoading: isEditLoading, mutate: editMutation } =
+    api.variable.update.useMutation({
+      onSuccess: () => {
+        editModal.close();
+        setSelectedVariable(null);
+        refetch();
+      },
+    });
 
   const rows = variables.map((variable) => (
     <Table.Tr key={variable.id}>
@@ -60,6 +81,8 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
               size={"xs"}
               loading={!!nav.loading?.url}
               loaderProps={{ type: "oval" }}
+              title="Edit"
+              onClick={() => openEditModal(variable)}
             >
               <IconEdit />
             </ActionIcon>
@@ -71,7 +94,8 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
               size={"xs"}
               loading={!!nav.loading?.url}
               loaderProps={{ type: "oval" }}
-              onClick={() => openModal(variable)}
+              onClick={() => openDeleteModal(variable)}
+              title="Delete"
             >
               <IconX />
             </ActionIcon>
@@ -84,14 +108,24 @@ export const VariableTable: FC<Props> = ({ variables, refetch }) => {
   return (
     <>
       {selectedVariable && (
-        <DeleteVariableModal
-          opened={deleteModal.opened}
-          onClose={deleteModal.close}
-          loading={isLoading || !!nav.loading?.url}
-          toDelete={selectedVariable}
-          variables={variables}
-          deleteFn={deleteMutation}
-        />
+        <>
+          <EditVariableModal
+            opened={editModal.opened}
+            onClose={closeEditModal}
+            loading={isEditLoading || !!nav.loading?.url}
+            variables={variables}
+            editFn={editMutation}
+            toEdit={selectedVariable}
+          />
+          <DeleteVariableModal
+            opened={deleteModal.opened}
+            onClose={closeDeleteModal}
+            loading={isDeleteLoading || !!nav.loading?.url}
+            toDelete={selectedVariable}
+            variables={variables}
+            deleteFn={deleteMutation}
+          />
+        </>
       )}
       <Table highlightOnHover withRowBorders>
         <Table.Thead>

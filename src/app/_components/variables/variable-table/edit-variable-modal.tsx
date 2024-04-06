@@ -1,10 +1,28 @@
 import { type FC } from "react";
-import { Modal, Space } from "@mantine/core";
+import {
+  Button,
+  Modal,
+  NumberInput,
+  Space,
+  Switch,
+  TextInput,
+} from "@mantine/core";
+import { type ResolvedVariable } from "~/services/variable";
+import { type Variable } from "@prisma/client";
+import { useForm } from "@mantine/form";
+import { type z } from "zod";
+import { type editVariableInputSchema } from "~/schemas";
+import { VariableEditor } from "~/app/_components/variables/variable-editor";
+import { useVariableEditor } from "~/app/_components/variables/use-variable-editor";
+import { resolveDependencies } from "~/app/_components/variables/resolve-dependencies";
 
 interface Props {
   opened: boolean;
   onClose: () => void;
   loading: boolean;
+  variables: ResolvedVariable[];
+  toEdit: ResolvedVariable;
+  editFn: (variable: Variable) => void;
 }
 
 // type BaseVariable = {
@@ -52,10 +70,57 @@ interface Props {
 // In this component, we should check the variable's name against its own dependencies and then recursively from there
 // At creation time, we should perform the same check just for the variable and its dependencies
 
-export const EditVariableModal: FC<Props> = ({ opened, onClose, loading }) => {
+const useEditVariableForm = (variableToEdit: Props["toEdit"]) =>
+  useForm<z.infer<typeof editVariableInputSchema>>({
+    initialValues: { ...variableToEdit },
+  });
+
+export const EditVariableModal: FC<Props> = ({
+  opened,
+  onClose,
+  loading,
+  variables,
+  editFn,
+  toEdit,
+}) => {
+  const form = useEditVariableForm(toEdit);
+  const variableEditor = useVariableEditor(toEdit.expression);
+
+  const isStatic = !!form.getInputProps("static").value;
+  const expressionError = form.errors?.expression;
+
+  const mutate = (data: z.infer<typeof editVariableInputSchema>) => {
+    console.log({ editorContent: variableEditor?.getText() ?? "" });
+    console.log({ mutationInput: data });
+    data.expression = variableEditor?.getText() ?? "";
+    if (toEdit.expression !== data.expression) {
+      data.dependencies = resolveDependencies(data.expression, variables);
+    }
+    console.log({ mutationOutput: data });
+    editFn(data);
+  };
+
   return (
     <Modal opened={opened} onClose={onClose} title="Edit Variable">
       <Space h="sm"></Space>
+      <form autoComplete="off" onSubmit={form.onSubmit(mutate)}>
+        <TextInput {...form.getInputProps("name")} label="Name" />
+        <Switch {...form.getInputProps("static")} label="Static" />
+        {isStatic ? (
+          <NumberInput {...form.getInputProps("expression")} label="Value" />
+        ) : (
+          <>
+            <VariableEditor
+              variables={variables}
+              editor={variableEditor}
+              hasError={!!expressionError}
+            />
+          </>
+        )}
+        <Button type="submit" variant="filled" loading={loading}>
+          Submit
+        </Button>
+      </form>
     </Modal>
   );
 };
