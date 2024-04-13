@@ -90,6 +90,12 @@ export const EditVariableModal: FC<Props> = ({
   const expressionError = form.errors?.expression;
 
   const mutate = (data: z.infer<typeof editVariableInputSchema>) => {
+    if (data.static) {
+      data.expression = `${data.expression}`;
+      data.dependencies = [];
+      editFn(data);
+      return;
+    }
     console.log({ editorContent: variableEditor?.getText() ?? "" });
     console.log({ mutationInput: data });
     data.expression = variableEditor?.getText() ?? "";
@@ -105,9 +111,17 @@ export const EditVariableModal: FC<Props> = ({
       <Space h="sm"></Space>
       <form autoComplete="off" onSubmit={form.onSubmit(mutate)}>
         <TextInput {...form.getInputProps("name")} label="Name" />
-        <Switch {...form.getInputProps("static")} label="Static" />
+        <Switch
+          {...form.getInputProps("static")}
+          label="Static"
+          checked={isStatic}
+        />
         {isStatic ? (
-          <NumberInput {...form.getInputProps("expression")} label="Value" />
+          <NumberInput
+            {...form.getInputProps("expression")}
+            value={Number(form.getInputProps("expression").value)}
+            label="Value"
+          />
         ) : (
           <>
             <VariableEditor

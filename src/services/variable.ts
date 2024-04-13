@@ -7,7 +7,9 @@ const compileEvalFn = (expr: string): { evaluate: EvalFn } => {
 };
 
 const shouldBeResolved = (variable: Variable): boolean =>
-  variable.expression !== "" && variable.dependencies.length > 0;
+  !variable.static &&
+  variable.expression !== "" &&
+  variable.dependencies.length > 0;
 
 const sanitizeExpression = (expression: string) =>
   expression.replaceAll(/[{}]/g, "");

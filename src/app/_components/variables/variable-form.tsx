@@ -58,8 +58,16 @@ export const VariableForm: FC<Props> = ({ refetch, variables }) => {
   });
 
   const mutate = (data: z.infer<typeof createVariableInputSchema>) => {
-    data.dependencies = resolveDependencies(editor?.getText() ?? "", variables);
-    data.expression = editor?.getText() ?? "";
+    if (data.static) {
+      data.dependencies = [];
+      data.expression = `${data.expression}`;
+    } else {
+      data.dependencies = resolveDependencies(
+        editor?.getText() ?? "",
+        variables,
+      );
+      data.expression = editor?.getText() ?? "";
+    }
     console.log(data);
     createVariable.mutate(data);
   };
@@ -73,7 +81,11 @@ export const VariableForm: FC<Props> = ({ refetch, variables }) => {
         <TextInput {...form.getInputProps("name")} label="Name" />
         <Switch {...form.getInputProps("static")} label="Static" />
         {isStatic ? (
-          <NumberInput {...form.getInputProps("expression")} label="Value" />
+          <NumberInput
+            {...form.getInputProps("expression")}
+            label="Value"
+            defaultValue={0}
+          />
         ) : (
           <>
             <VariableEditor
