@@ -38,11 +38,7 @@ export const VariableDrawer: FC<Props> = ({ initialVariables }) => {
   return (
     <>
       <Drawer opened={opened} onClose={close} title="Variables">
-        <VariableForm
-          status={{ mode: "create" }}
-          variables={data}
-          refetch={refetchAndUpdateVariables}
-        />
+        <VariableForm variables={data} refetch={refetchAndUpdateVariables} />
         <Space className="mb-8" />
         <Box pos="relative">
           <LoadingOverlay

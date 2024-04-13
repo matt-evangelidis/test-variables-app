@@ -2,8 +2,8 @@
 
 import { type FC } from "react";
 import type { Variable } from "@prisma/client";
-import { useForm, zodResolver } from "@mantine/form";
-import { createVariableInputSchema } from "~/schemas";
+import { useForm } from "@mantine/form";
+import { type createVariableInputSchema } from "~/schemas";
 import { type z } from "zod";
 import { api } from "~/trpc/react";
 import {
@@ -19,22 +19,10 @@ import { useCacheBustedNavigation } from "$next-helpers";
 import { useVariableEditor } from "~/app/_components/variables/use-variable-editor";
 import { resolveDependencies } from "~/app/_components/variables/resolve-dependencies";
 
-type VariableFormStatus =
-  | { mode: "create" }
-  | {
-      mode: "edit";
-      data: {
-        variable: Variable;
-      };
-    };
-
 type Props = {
-  status: VariableFormStatus;
   variables: Variable[];
   refetch: () => void;
 };
-
-const formResolver = zodResolver(createVariableInputSchema);
 
 const useCreateVariableForm = () =>
   useForm<z.infer<typeof createVariableInputSchema>>({
@@ -54,7 +42,7 @@ const useCreateVariableForm = () =>
     },
   });
 
-export const VariableForm: FC<Props> = ({ status, refetch, variables }) => {
+export const VariableForm: FC<Props> = ({ refetch, variables }) => {
   const form = useCreateVariableForm();
   const nav = useCacheBustedNavigation();
   const editor = useVariableEditor();
