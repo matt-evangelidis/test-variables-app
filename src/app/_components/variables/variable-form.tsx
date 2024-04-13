@@ -79,7 +79,11 @@ export const VariableForm: FC<Props> = ({ refetch, variables }) => {
     <>
       <form autoComplete={"off"} onSubmit={form.onSubmit(mutate)}>
         <TextInput {...form.getInputProps("name")} label="Name" />
-        <Switch {...form.getInputProps("static")} label="Static" />
+        <Switch
+          {...form.getInputProps("static")}
+          label="Static"
+          checked={isStatic}
+        />
         {isStatic ? (
           <NumberInput
             {...form.getInputProps("expression")}
